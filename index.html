@@ -23,6 +23,24 @@
       --switch-bg: #e2e8f0;
       --switch-thumb: #94a3b8;
       --gray-border: #d1d5db;
+      /* Light mode scrollbars */
+      scrollbar-color: #ccc #f4f7f9;
+      scrollbar-width: thin;
+    }
+
+    :root ::-webkit-scrollbar {
+      width: 12px;
+      background: #f4f7f9;
+    }
+
+    :root ::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 6px;
+      border: 2px solid #f4f7f9;
+    }
+
+    :root ::-webkit-scrollbar-thumb:hover {
+      background: #b0b0b0;
     }
 
     [data-theme="dark"] {
@@ -42,6 +60,24 @@
       --switch-bg: #4b5563;
       --switch-thumb: #e5e7eb;
       --gray-border: #4b5563;
+      /* Dark mode scrollbars */
+      scrollbar-color: #4b5563 #374151;
+      scrollbar-width: thin;
+    }
+
+    [data-theme="dark"] ::-webkit-scrollbar {
+      width: 12px;
+      background: #374151;
+    }
+
+    [data-theme="dark"] ::-webkit-scrollbar-thumb {
+      background: #4b5563;
+      border-radius: 6px;
+      border: 2px solid #374151;
+    }
+
+    [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+      background: #6b7280;
     }
 
     body {
@@ -69,12 +105,16 @@
     .theme-switch {
       display: flex;
       align-items: center;
-      /* This ensures vertical alignment */
     }
 
     .theme-switch-label {
       margin-right: 10px;
       font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--label-color);
+      line-height: 1;
+      display: flex;
+      align-items: center;
     }
 
     .switch {
@@ -226,7 +266,6 @@
     }
 
     @keyframes gradient-shift {
-
       0%,
       100% {
         background-position: 0% 50%;
@@ -312,13 +351,44 @@
       height: 24px;
       /* Match the height of the switch */
     }
+
+    /* Light mode (default) scrollbars for Firefox */
+    body, html {
+      scrollbar-color: #ccc #f4f7f9;
+      scrollbar-width: thin;
+    }
+    /* Dark mode scrollbars for Firefox */
+    [data-theme="dark"] body,
+    [data-theme="dark"] html {
+      scrollbar-color: #4b5563 #374151;
+      scrollbar-width: thin;
+    }
   </style>
+  <script>
+    // Set theme as early as possible to avoid FOUC
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+      // Listen for OS theme changes and update theme if user hasn't chosen manually
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (!localStorage.getItem('theme')) {
+          document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+        }
+      });
+    })();
+  </script>
 </head>
 
 <body>
   <div class="theme-switch-wrapper">
     <div class="theme-switch">
-      <span class="mode-icon">🌙</span>
+      <span class="theme-switch-label">Tryb ciemny:</span>
       <label class="switch">
         <input type="checkbox" id="themeToggle">
         <span class="slider"></span>
@@ -376,17 +446,6 @@
 
       // Create occasional floating particles
       setInterval(createFloatingParticles, 2000);
-
-      // Check for saved theme preference or respect OS preference
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        themeToggle.checked = savedTheme === 'dark';
-      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        // Default to dark mode if user has dark preference in OS
-        document.documentElement.setAttribute('data-theme', 'dark');
-        themeToggle.checked = true;
-      }
     });
 
     function calculate() {
