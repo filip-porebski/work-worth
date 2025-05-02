@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ile czasu twojej pracy to kosztuje?</title>
+  <style>
+    :root {
+      --primary: #007bff;
+      --primary-hover: #0056b3;
+      --bg: #f4f7f9;
+      --card-bg: #fff;
+      --button-primary: #3B82F6;
+      --button-secondary: #2563EB;
+      --button-shadow: rgba(59, 130, 246, 0.5);
+      --button-text: #fff;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 450px;
+      width: 100%;
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    .btn-wrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0.5rem 0;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+    .btn {
+      position: relative;
+      width: 100%;
+      padding: 0.9rem;
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--button-primary);
+      color: var(--button-text);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 1;
+      transition: all 0.3s ease;
+      overflow: hidden;
+      transform: translateZ(0);
+      box-shadow: 0 6px 20px -6px var(--button-shadow);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px var(--button-shadow);
+    }
+    .btn:active {
+      transform: translateY(1px);
+    }
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -75%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: skewX(-25deg);
+      z-index: 2;
+      transition: all 0.75s ease;
+    }
+    .btn:hover::before {
+      left: 125%;
+      transition: all 0.75s ease;
+    }
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, var(--button-primary), var(--button-secondary), var(--button-primary));
+      background-size: 200% 100%;
+      z-index: -1;
+      animation: gradient-shift 3s ease infinite;
+    }
+    @keyframes gradient-shift {
+      0%, 100% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+    .pulse {
+      position: absolute;
+      inset: -4px;
+      background: transparent;
+      z-index: 0;
+      border-radius: 8px;
+    }
+    .pulse::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      box-shadow: 0 0 20px 5px var(--button-shadow);
+      animation: pulse 2s ease-out infinite;
+    }
+    @keyframes pulse {
+      0% {
+        opacity: 0.8;
+        transform: scale(0.95);
+      }
+      50% {
+        opacity: 0.3;
+        transform: scale(1.02);
+      }
+      100% {
+        opacity: 0.8;
+        transform: scale(0.95);
+      }
+    }
+    .particles-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      pointer-events: none;
+    }
+    .result {
+      background: var(--bg);
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .result p {
+      margin: 0.5rem 0;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Ile czasu twojej pracy to kosztuje?</h1><br>
+    <label for="salary">Miesięczne wynagrodzenie netto (zł)</label>
+    <input type="number" id="salary" value="3510.92" step="0.01" min="0" />
+
+    <label for="hours">Godzin pracy tygodniowo</label>
+    <input type="number" id="hours" value="40" step="0.1" min="0" />
+
+    <label for="amount">Kwota wydatku (zł)</label>
+    <input type="number" id="amount" value="100" step="0.01" min="0" />
+
+    <br><br>
+
+    <div class="btn-wrapper">
+      <div class="pulse"></div>
+      <button id="calculate" class="btn">Oblicz</button>
+      <div class="particles-container"></div>
+    </div>
+
+    <div class="result" id="result" style="display: none;">
+      <p id="rate"></p>
+      <p id="timeNeeded"></p>
+    </div>
+  </div>
+
+  <script>
+    // DOM elements
+    const salaryInput = document.getElementById('salary');
+    const hoursInput = document.getElementById('hours');
+    const amountInput = document.getElementById('amount');
+    const calculateButton = document.getElementById('calculate');
+    const resultDiv = document.getElementById('result');
+    const rateOutput = document.getElementById('rate');
+    const timeNeededOutput = document.getElementById('timeNeeded');
+    const particlesContainer = document.querySelector('.particles-container');
+    const button = document.querySelector('.btn');
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fix input format (replace comma with dot for proper number parsing)
+      salaryInput.value = salaryInput.value.replace(',', '.');
+      
+      // Event listeners
+      calculateButton.addEventListener('click', calculate);
+      button.addEventListener('mouseover', createFloatingParticles);
+      
+      // Create occasional floating particles
+      setInterval(createFloatingParticles, 2000);
+    });
+
+    function calculate() {
+      const salary = parseFloat(salaryInput.value);
+      const weeklyHours = parseFloat(hoursInput.value);
+      const amount = parseFloat(amountInput.value);
+
+      if (isNaN(salary) || isNaN(weeklyHours) || isNaN(amount) || weeklyHours <= 0) {
+        alert('Proszę wprowadzić poprawne wartości.');
+        return;
+      }
+
+      // Convert weekly hours to monthly (4.33 weeks per month on average)
+      const monthlyHours = (weeklyHours * 52) / 12;
+      const rate = salary / monthlyHours;
+      const time = amount / rate;
+
+      const hours = Math.floor(time);
+      const minutes = Math.round((time - hours) * 60);
+
+      rateOutput.textContent = `Stawka godzinowa: ${rate.toFixed(2)} zł/h`;
+      timeNeededOutput.textContent = `Czas pracy potrzebny na ${amount.toFixed(2)} zł: ${hours} godz. ${minutes} min.`;
+      resultDiv.style.display = 'block';
+      
+      createParticleExplosion();
+    }
+
+    /**
+     * Creates particles that float upward when hovering over the button
+     * Limited number of particles to maintain performance
+     */
+    function createFloatingParticles() {
+      for (let i = 0; i < 4; i++) {
+        setTimeout(() => {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          
+          const xPos = 10 + Math.random() * 80;
+          particle.style.left = `${xPos}%`;
+          particle.style.bottom = '0';
+          
+          const size = 3 + Math.random() * 4;
+          particle.style.width = `${size}px`;
+          particle.style.height = `${size}px`;
+          
+          particle.style.opacity = 0.3 + Math.random() * 0.5;
+          
+          particlesContainer.appendChild(particle);
+          
+          let bottom = 0;
+          let opacity = parseFloat(particle.style.opacity);
+          
+          const rise = setInterval(() => {
+            bottom += 0.7;
+            opacity -= 0.005;
+            
+            particle.style.bottom = `${bottom}px`;
+            particle.style.opacity = opacity;
+            
+            if (bottom > 80 || opacity <= 0) {
+              clearInterval(rise);
+              particle.remove();
+            }
+          }, 16);
+        }, i * 200);
+      }
+    }
+
+    /**
+     * Creates a burst effect of particles when the calculation button is clicked
+     * Uses relative positioning to ensure compatibility across screen sizes
+     */
+    function createParticleExplosion() {
+      const buttonRect = button.getBoundingClientRect();
+      
+      const centerX = (buttonRect.width / 2);
+      const centerY = (buttonRect.height / 2);
+      
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        particle.style.left = `${centerX}px`;
+        particle.style.top = `${centerY}px`;
+        
+        const size = 2 + Math.random() * 5;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        particle.style.opacity = 0.5 + Math.random() * 0.5;
+        
+        // Create blue particles with slight variation
+        const hue = 210 + Math.random() * 30;
+        const saturation = 80 + Math.random() * 20;
+        const lightness = 60 + Math.random() * 20;
+        particle.style.background = `hsla(${hue}, ${saturation}%, ${lightness}%, ${particle.style.opacity})`;
+        
+        particlesContainer.appendChild(particle);
+        
+        // Calculate random trajectory
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1 + Math.random() * 5;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+        
+        let x = centerX;
+        let y = centerY;
+        let opacity = parseFloat(particle.style.opacity);
+        
+        const move = setInterval(() => {
+          x += vx;
+          y += vy;
+          opacity -= 0.02;
+          
+          particle.style.left = `${x}px`;
+          particle.style.top = `${y}px`;
+          particle.style.opacity = opacity;
+          
+          if (opacity <= 0 || 
+              x < 0 || x > buttonRect.width || 
+              y < 0 || y > buttonRect.height) {
+            clearInterval(move);
+            particle.remove();
+          }
+        }, 16);
+      }
+    }
+  </script>
+</body>
+</html>
