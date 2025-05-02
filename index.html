@@ -6,6 +6,7 @@
   <title>Ile czasu twojej pracy to kosztuje?</title>
   <style>
     :root {
+      /* Light mode variables */
       --primary: #007bff;
       --primary-hover: #0056b3;
       --bg: #f4f7f9;
@@ -14,16 +15,112 @@
       --button-secondary: #2563EB;
       --button-shadow: rgba(59, 130, 246, 0.5);
       --button-text: #fff;
+      --text-color: #333;
+      --label-color: #555;
+      --input-border: #ccc;
+      --result-bg: #f4f7f9;
+      --switch-bg: #e2e8f0;
+      --switch-thumb: #94a3b8;
+      --gray-border: #d1d5db;
     }
+    
+    [data-theme="dark"] {
+      /* Dark mode variables */
+      --primary: #3B82F6;
+      --primary-hover: #2563EB;
+      --bg: #1f2937;
+      --card-bg: #374151;
+      --button-primary: #3B82F6;
+      --button-secondary: #60A5FA;
+      --button-shadow: rgba(59, 130, 246, 0.3);
+      --button-text: #fff;
+      --text-color: #e5e7eb;
+      --label-color: #d1d5db;
+      --input-border: #4b5563;
+      --result-bg: #2d3748;
+      --switch-bg: #4b5563;
+      --switch-thumb: #e5e7eb;
+      --gray-border: #4b5563;
+    }
+    
     body {
       font-family: 'Segoe UI', Tahoma, sans-serif;
       background: var(--bg);
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
       min-height: 100vh;
       margin: 0;
+      color: var(--text-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      padding: 20px;
     }
+    
+    .theme-switch-wrapper {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 450px;
+      justify-content: flex-end;
+    }
+    
+    .theme-switch {
+      display: inline-flex;
+      align-items: center;
+    }
+    
+    .theme-switch-label {
+      margin-right: 10px;
+      font-weight: 500;
+    }
+    
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--switch-bg);
+      transition: .3s;
+      border-radius: 24px;
+      border: 1px solid var(--gray-border);
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 2px;
+      background-color: var(--switch-thumb);
+      transition: .3s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: var(--switch-bg);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(25px);
+    }
+    
     .container {
       background: var(--card-bg);
       padding: 2rem;
@@ -31,25 +128,36 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       max-width: 450px;
       width: 100%;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
     }
+    
     h1 {
       margin-top: 0;
       font-size: 1.5rem;
       text-align: center;
+      color: var(--text-color);
     }
+    
     label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 600;
+      color: var(--label-color);
     }
+    
     input[type="number"] {
       width: 100%;
       padding: 0.5rem;
-      border: 1px solid #ccc;
+      border: 1px solid var(--input-border);
       border-radius: 6px;
       margin-bottom: 1rem;
       font-size: 1rem;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     }
+    
     .btn-wrapper {
       position: relative;
       display: flex;
@@ -59,6 +167,7 @@
       overflow: hidden;
       border-radius: 8px;
     }
+    
     .btn {
       position: relative;
       width: 100%;
@@ -76,13 +185,16 @@
       transform: translateZ(0);
       box-shadow: 0 6px 20px -6px var(--button-shadow);
     }
+    
     .btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 25px -5px var(--button-shadow);
     }
+    
     .btn:active {
       transform: translateY(1px);
     }
+    
     .btn::before {
       content: '';
       position: absolute;
@@ -95,10 +207,12 @@
       z-index: 2;
       transition: all 0.75s ease;
     }
+    
     .btn:hover::before {
       left: 125%;
       transition: all 0.75s ease;
     }
+    
     .btn::after {
       content: '';
       position: absolute;
@@ -108,6 +222,7 @@
       z-index: -1;
       animation: gradient-shift 3s ease infinite;
     }
+    
     @keyframes gradient-shift {
       0%, 100% {
         background-position: 0% 50%;
@@ -116,6 +231,7 @@
         background-position: 100% 50%;
       }
     }
+    
     .pulse {
       position: absolute;
       inset: -4px;
@@ -123,6 +239,7 @@
       z-index: 0;
       border-radius: 8px;
     }
+    
     .pulse::after {
       content: '';
       position: absolute;
@@ -131,6 +248,7 @@
       box-shadow: 0 0 20px 5px var(--button-shadow);
       animation: pulse 2s ease-out infinite;
     }
+    
     @keyframes pulse {
       0% {
         opacity: 0.8;
@@ -145,6 +263,7 @@
         transform: scale(0.95);
       }
     }
+    
     .particles-container {
       position: absolute;
       inset: 0;
@@ -152,6 +271,7 @@
       overflow: hidden;
       z-index: 0;
     }
+    
     .particle {
       position: absolute;
       width: 6px;
@@ -160,20 +280,40 @@
       background: rgba(255, 255, 255, 0.5);
       pointer-events: none;
     }
+    
     .result {
-      background: var(--bg);
+      background: var(--result-bg);
       padding: 1rem;
       border-radius: 6px;
       margin-top: 1rem;
       text-align: center;
+      transition: background-color 0.3s ease;
     }
+    
     .result p {
       margin: 0.5rem 0;
       font-size: 1rem;
+      color: var(--text-color);
+    }
+    
+    /* Dark/Light mode icons */
+    .mode-icon {
+      margin: 0 5px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
+  <div class="theme-switch-wrapper">
+    <div class="theme-switch">
+      <span class="mode-icon">🌙</span>
+      <label class="switch">
+        <input type="checkbox" id="themeToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+  
   <div class="container">
     <h1>Ile czasu twojej pracy to kosztuje?</h1><br>
     <label for="salary">Miesięczne wynagrodzenie netto (zł)</label>
@@ -210,6 +350,7 @@
     const timeNeededOutput = document.getElementById('timeNeeded');
     const particlesContainer = document.querySelector('.particles-container');
     const button = document.querySelector('.btn');
+    const themeToggle = document.getElementById('themeToggle');
     
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
@@ -219,9 +360,21 @@
       // Event listeners
       calculateButton.addEventListener('click', calculate);
       button.addEventListener('mouseover', createFloatingParticles);
+      themeToggle.addEventListener('change', toggleTheme);
       
       // Create occasional floating particles
       setInterval(createFloatingParticles, 2000);
+      
+      // Check for saved theme preference or respect OS preference
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggle.checked = savedTheme === 'dark';
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // Default to dark mode if user has dark preference in OS
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.checked = true;
+      }
     });
 
     function calculate() {
@@ -348,6 +501,22 @@
           }
         }, 16);
       }
+    }
+    
+    /**
+     * Toggles between light and dark themes
+     */
+    function toggleTheme() {
+      const newTheme = themeToggle.checked ? 'dark' : 'light';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      
+      // Add a subtle animation effect when changing themes
+      document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+      setTimeout(() => {
+        document.body.style.transition = '';
+      }, 300);
     }
   </script>
 </body>
