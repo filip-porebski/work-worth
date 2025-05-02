@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -23,7 +24,7 @@
       --switch-thumb: #94a3b8;
       --gray-border: #d1d5db;
     }
-    
+
     [data-theme="dark"] {
       /* Dark mode variables */
       --primary: #3B82F6;
@@ -42,7 +43,7 @@
       --switch-thumb: #e5e7eb;
       --gray-border: #4b5563;
     }
-    
+
     body {
       font-family: 'Segoe UI', Tahoma, sans-serif;
       background: var(--bg);
@@ -55,7 +56,7 @@
       transition: background-color 0.3s ease, color 0.3s ease;
       padding: 20px;
     }
-    
+
     .theme-switch-wrapper {
       display: flex;
       align-items: center;
@@ -64,30 +65,31 @@
       max-width: 450px;
       justify-content: flex-end;
     }
-    
+
     .theme-switch {
-      display: inline-flex;
+      display: flex;
       align-items: center;
+      /* This ensures vertical alignment */
     }
-    
+
     .theme-switch-label {
       margin-right: 10px;
       font-weight: 500;
     }
-    
+
     .switch {
       position: relative;
       display: inline-block;
       width: 50px;
       height: 24px;
     }
-    
+
     .switch input {
       opacity: 0;
       width: 0;
       height: 0;
     }
-    
+
     .slider {
       position: absolute;
       cursor: pointer;
@@ -100,7 +102,7 @@
       border-radius: 24px;
       border: 1px solid var(--gray-border);
     }
-    
+
     .slider:before {
       position: absolute;
       content: "";
@@ -112,15 +114,15 @@
       transition: .3s;
       border-radius: 50%;
     }
-    
-    input:checked + .slider {
+
+    input:checked+.slider {
       background-color: var(--switch-bg);
     }
-    
-    input:checked + .slider:before {
+
+    input:checked+.slider:before {
       transform: translateX(25px);
     }
-    
+
     .container {
       background: var(--card-bg);
       padding: 2rem;
@@ -131,21 +133,21 @@
       transition: background-color 0.3s ease;
       margin-top: 10px;
     }
-    
+
     h1 {
       margin-top: 0;
       font-size: 1.5rem;
       text-align: center;
       color: var(--text-color);
     }
-    
+
     label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 600;
       color: var(--label-color);
     }
-    
+
     input[type="number"] {
       width: 100%;
       padding: 0.5rem;
@@ -157,7 +159,7 @@
       color: var(--text-color);
       transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     }
-    
+
     .btn-wrapper {
       position: relative;
       display: flex;
@@ -167,7 +169,7 @@
       overflow: hidden;
       border-radius: 8px;
     }
-    
+
     .btn {
       position: relative;
       width: 100%;
@@ -185,16 +187,16 @@
       transform: translateZ(0);
       box-shadow: 0 6px 20px -6px var(--button-shadow);
     }
-    
+
     .btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 25px -5px var(--button-shadow);
     }
-    
+
     .btn:active {
       transform: translateY(1px);
     }
-    
+
     .btn::before {
       content: '';
       position: absolute;
@@ -207,12 +209,12 @@
       z-index: 2;
       transition: all 0.75s ease;
     }
-    
+
     .btn:hover::before {
       left: 125%;
       transition: all 0.75s ease;
     }
-    
+
     .btn::after {
       content: '';
       position: absolute;
@@ -222,16 +224,19 @@
       z-index: -1;
       animation: gradient-shift 3s ease infinite;
     }
-    
+
     @keyframes gradient-shift {
-      0%, 100% {
+
+      0%,
+      100% {
         background-position: 0% 50%;
       }
+
       50% {
         background-position: 100% 50%;
       }
     }
-    
+
     .pulse {
       position: absolute;
       inset: -4px;
@@ -239,7 +244,7 @@
       z-index: 0;
       border-radius: 8px;
     }
-    
+
     .pulse::after {
       content: '';
       position: absolute;
@@ -248,22 +253,24 @@
       box-shadow: 0 0 20px 5px var(--button-shadow);
       animation: pulse 2s ease-out infinite;
     }
-    
+
     @keyframes pulse {
       0% {
         opacity: 0.8;
         transform: scale(0.95);
       }
+
       50% {
         opacity: 0.3;
         transform: scale(1.02);
       }
+
       100% {
         opacity: 0.8;
         transform: scale(0.95);
       }
     }
-    
+
     .particles-container {
       position: absolute;
       inset: 0;
@@ -271,7 +278,7 @@
       overflow: hidden;
       z-index: 0;
     }
-    
+
     .particle {
       position: absolute;
       width: 6px;
@@ -280,7 +287,7 @@
       background: rgba(255, 255, 255, 0.5);
       pointer-events: none;
     }
-    
+
     .result {
       background: var(--result-bg);
       padding: 1rem;
@@ -289,20 +296,25 @@
       text-align: center;
       transition: background-color 0.3s ease;
     }
-    
+
     .result p {
       margin: 0.5rem 0;
       font-size: 1rem;
       color: var(--text-color);
     }
-    
+
     /* Dark/Light mode icons */
     .mode-icon {
-      margin: 0 5px;
-      font-size: 14px;
+      font-size: 20px;
+      /* Adjust as needed */
+      display: flex;
+      align-items: center;
+      height: 24px;
+      /* Match the height of the switch */
     }
   </style>
 </head>
+
 <body>
   <div class="theme-switch-wrapper">
     <div class="theme-switch">
@@ -313,7 +325,7 @@
       </label>
     </div>
   </div>
-  
+
   <div class="container">
     <h1>Ile czasu twojej pracy to kosztuje?</h1><br>
     <label for="salary">Miesięczne wynagrodzenie netto (zł)</label>
@@ -351,20 +363,20 @@
     const particlesContainer = document.querySelector('.particles-container');
     const button = document.querySelector('.btn');
     const themeToggle = document.getElementById('themeToggle');
-    
+
     // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       // Fix input format (replace comma with dot for proper number parsing)
       salaryInput.value = salaryInput.value.replace(',', '.');
-      
+
       // Event listeners
       calculateButton.addEventListener('click', calculate);
       button.addEventListener('mouseover', createFloatingParticles);
       themeToggle.addEventListener('change', toggleTheme);
-      
+
       // Create occasional floating particles
       setInterval(createFloatingParticles, 2000);
-      
+
       // Check for saved theme preference or respect OS preference
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme) {
@@ -398,7 +410,7 @@
       rateOutput.textContent = `Stawka godzinowa: ${rate.toFixed(2)} zł/h`;
       timeNeededOutput.textContent = `Czas pracy potrzebny na ${amount.toFixed(2)} zł: ${hours} godz. ${minutes} min.`;
       resultDiv.style.display = 'block';
-      
+
       createParticleExplosion();
     }
 
@@ -411,29 +423,29 @@
         setTimeout(() => {
           const particle = document.createElement('div');
           particle.className = 'particle';
-          
+
           const xPos = 10 + Math.random() * 80;
           particle.style.left = `${xPos}%`;
           particle.style.bottom = '0';
-          
+
           const size = 3 + Math.random() * 4;
           particle.style.width = `${size}px`;
           particle.style.height = `${size}px`;
-          
+
           particle.style.opacity = 0.3 + Math.random() * 0.5;
-          
+
           particlesContainer.appendChild(particle);
-          
+
           let bottom = 0;
           let opacity = parseFloat(particle.style.opacity);
-          
+
           const rise = setInterval(() => {
             bottom += 0.7;
             opacity -= 0.005;
-            
+
             particle.style.bottom = `${bottom}px`;
             particle.style.opacity = opacity;
-            
+
             if (bottom > 80 || opacity <= 0) {
               clearInterval(rise);
               particle.remove();
@@ -449,69 +461,69 @@
      */
     function createParticleExplosion() {
       const buttonRect = button.getBoundingClientRect();
-      
+
       const centerX = (buttonRect.width / 2);
       const centerY = (buttonRect.height / 2);
-      
+
       for (let i = 0; i < 20; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
-        
+
         particle.style.left = `${centerX}px`;
         particle.style.top = `${centerY}px`;
-        
+
         const size = 2 + Math.random() * 5;
         particle.style.width = `${size}px`;
         particle.style.height = `${size}px`;
-        
+
         particle.style.opacity = 0.5 + Math.random() * 0.5;
-        
+
         // Create blue particles with slight variation
         const hue = 210 + Math.random() * 30;
         const saturation = 80 + Math.random() * 20;
         const lightness = 60 + Math.random() * 20;
         particle.style.background = `hsla(${hue}, ${saturation}%, ${lightness}%, ${particle.style.opacity})`;
-        
+
         particlesContainer.appendChild(particle);
-        
+
         // Calculate random trajectory
         const angle = Math.random() * Math.PI * 2;
         const speed = 1 + Math.random() * 5;
         const vx = Math.cos(angle) * speed;
         const vy = Math.sin(angle) * speed;
-        
+
         let x = centerX;
         let y = centerY;
         let opacity = parseFloat(particle.style.opacity);
-        
+
         const move = setInterval(() => {
           x += vx;
           y += vy;
           opacity -= 0.02;
-          
+
           particle.style.left = `${x}px`;
           particle.style.top = `${y}px`;
           particle.style.opacity = opacity;
-          
-          if (opacity <= 0 || 
-              x < 0 || x > buttonRect.width || 
-              y < 0 || y > buttonRect.height) {
+
+          if (opacity <= 0 ||
+            x < 0 || x > buttonRect.width ||
+            y < 0 || y > buttonRect.height) {
             clearInterval(move);
             particle.remove();
           }
         }, 16);
       }
     }
-    
+
     /**
      * Toggles between light and dark themes
      */
     function toggleTheme() {
       const newTheme = themeToggle.checked ? 'dark' : 'light';
-      
+
       document.documentElement.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
-      
+
       // Add a subtle animation effect when changing themes
       document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
       setTimeout(() => {
@@ -520,4 +532,5 @@
     }
   </script>
 </body>
+
 </html>
