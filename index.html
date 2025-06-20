@@ -272,6 +272,50 @@
       border-color: var(--input-focus);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
+    
+    .input-group {
+      display: flex;
+      margin-bottom: 1.25rem;
+    }
+    
+    .input-group input[type="number"] {
+      flex: 1;
+      margin-bottom: 0;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      border-right: none;
+    }
+    
+    .currency-select {
+      width: auto;
+      min-width: 100px;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--input-border);
+      border-top-right-radius: var(--input-radius);
+      border-bottom-right-radius: var(--input-radius);
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      font-size: 1rem;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      font-family: var(--font-family);
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 16px;
+      padding-right: 28px;
+      cursor: pointer;
+    }
+    
+    .currency-select:focus {
+      outline: none;
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
 
     .btn-wrapper {
       position: relative;
@@ -529,7 +573,41 @@
     <input type="number" id="hours" value="40" step="0.1" min="0" />
 
     <label for="amount" id="amountLabel">Cost of item</label>
-    <input type="number" id="amount" value="100" step="0.01" min="0" />
+    <div class="input-group">
+      <input type="number" id="amount" value="100" step="0.01" min="0" />
+      <select id="currencySelect" class="currency-select">
+        <option value="USD">USD ($)</option>
+        <option value="EUR">EUR (€)</option>
+        <option value="JPY">JPY (¥)</option>
+        <option value="GBP">GBP (£)</option>
+        <option value="AUD">AUD (A$)</option>
+        <option value="CAD">CAD (C$)</option>
+        <option value="CHF">CHF (Fr)</option>
+        <option value="CNY">CNY (¥)</option>
+        <option value="HKD">HKD (HK$)</option>
+        <option value="NZD">NZD (NZ$)</option>
+        <option value="SEK">SEK (kr)</option>
+        <option value="KRW">KRW (₩)</option>
+        <option value="SGD">SGD (S$)</option>
+        <option value="NOK">NOK (kr)</option>
+        <option value="MXN">MXN ($)</option>
+        <option value="INR">INR (₹)</option>
+        <option value="RUB">RUB (₽)</option>
+        <option value="ZAR">ZAR (R)</option>
+        <option value="TRY">TRY (₺)</option>
+        <option value="BRL">BRL (R$)</option>
+        <option value="TWD">TWD (NT$)</option>
+        <option value="DKK">DKK (kr)</option>
+        <option value="PLN">PLN (zł)</option>
+        <option value="THB">THB (฿)</option>
+        <option value="IDR">IDR (Rp)</option>
+        <option value="HUF">HUF (Ft)</option>
+        <option value="CZK">CZK (Kč)</option>
+        <option value="ILS">ILS (₪)</option>
+        <option value="CLP">CLP ($)</option>
+        <option value="PHP">PHP (₱)</option>
+      </select>
+    </div>
 
     <div class="btn-wrapper">
       <div class="pulse"></div>
@@ -648,9 +726,45 @@
     const button = document.querySelector('.btn');
     const themeToggle = document.getElementById('themeToggle');
     const languageSelect = document.getElementById('languageSelect');
+    const currencySelect = document.getElementById('currencySelect');
 
-    // Current language
+    // Current language and currency
     let currentLanguage = 'en';
+    let currentCurrency = 'USD';
+    
+    // Currency symbols mapping
+    const currencySymbols = {
+      'USD': '$',
+      'EUR': '€',
+      'JPY': '¥',
+      'GBP': '£',
+      'AUD': 'A$',
+      'CAD': 'C$',
+      'CHF': 'Fr',
+      'CNY': '¥',
+      'HKD': 'HK$',
+      'NZD': 'NZ$',
+      'SEK': 'kr',
+      'KRW': '₩',
+      'SGD': 'S$',
+      'NOK': 'kr',
+      'MXN': '$',
+      'INR': '₹',
+      'RUB': '₽',
+      'ZAR': 'R',
+      'TRY': '₺',
+      'BRL': 'R$',
+      'TWD': 'NT$',
+      'DKK': 'kr',
+      'PLN': 'zł',
+      'THB': '฿',
+      'IDR': 'Rp',
+      'HUF': 'Ft',
+      'CZK': 'Kč',
+      'ILS': '₪',
+      'CLP': '$',
+      'PHP': '₱'
+    };
     
     // Helper function to format strings with placeholders
     function formatString(str, ...args) {
@@ -717,8 +831,32 @@
         currentLanguage = browserLanguage;
       }
       
+      // Set initial currency based on saved preference or default by region
+      const savedCurrency = localStorage.getItem('currency');
+      let defaultCurrency = 'USD';
+      
+      // Set default currency based on browser language if no saved preference
+      if (browserLanguage === 'pl') {
+        defaultCurrency = 'PLN';
+      } else if (['de', 'fr', 'it', 'es'].includes(browserLanguage)) {
+        defaultCurrency = 'EUR';
+      } else if (browserLanguage === 'ja') {
+        defaultCurrency = 'JPY';
+      } else if (browserLanguage === 'zh') {
+        defaultCurrency = 'CNY';
+      } else if (browserLanguage === 'ru') {
+        defaultCurrency = 'RUB';
+      } else if (browserLanguage === 'pt') {
+        defaultCurrency = 'BRL';
+      }
+      
+      currentCurrency = savedCurrency || defaultCurrency;
+      
       // Set the language selector to match the current language
       languageSelect.value = currentLanguage;
+      
+      // Set the currency selector to match the current currency
+      currencySelect.value = currentCurrency;
       
       // Update all text elements to the current language
       updateLanguage(currentLanguage);
@@ -729,6 +867,15 @@
       themeToggle.addEventListener('change', toggleTheme);
       languageSelect.addEventListener('change', function() {
         updateLanguage(this.value);
+      });
+      currencySelect.addEventListener('change', function() {
+        currentCurrency = this.value;
+        localStorage.setItem('currency', currentCurrency);
+        
+        // Recalculate if results are displayed
+        if (resultDiv.style.display !== 'none') {
+          calculate();
+        }
       });
 
       // Create occasional floating particles
@@ -769,8 +916,8 @@
       // Calculate number of paychecks needed
       const paychecksNeeded = amount / salary;
       
-      // Get currency symbol from translations
-      const currencySymbol = t.currencySymbol || '$';
+      // Get currency symbol from the selected currency
+      const currencySymbol = currencySymbols[currentCurrency] || '$';
 
       // Set hourly rate
       rateOutput.textContent = formatString(t.hourlyRate, `${rate.toFixed(2)} ${currencySymbol}`);
