@@ -9,90 +9,105 @@
   <style>
     :root {
       /* Light mode variables */
-      --primary: #007bff;
-      --primary-hover: #0056b3;
-      --bg: #f4f7f9;
-      --card-bg: #fff;
-      --button-primary: #3B82F6;
-      --button-secondary: #2563EB;
-      --button-shadow: rgba(59, 130, 246, 0.5);
-      --button-text: #fff;
-      --text-color: #333;
-      --label-color: #555;
-      --input-border: #ccc;
-      --result-bg: #f4f7f9;
-      --switch-bg: #e2e8f0;
-      --switch-thumb: #94a3b8;
-      --gray-border: #d1d5db;
+      --primary: #4F46E5;
+      --primary-hover: #4338CA;
+      --bg: #F9FAFB;
+      --card-bg: #FFFFFF;
+      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      --button-primary: #4F46E5;
+      --button-secondary: #6366F1;
+      --button-shadow: rgba(79, 70, 229, 0.25);
+      --button-text: #FFFFFF;
+      --text-color: #1F2937;
+      --label-color: #4B5563;
+      --input-border: #E5E7EB;
+      --input-focus: #4F46E5;
+      --result-bg: #F3F4F6;
+      --switch-bg: #E5E7EB;
+      --switch-thumb: #9CA3AF;
+      --gray-border: #D1D5DB;
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      --border-radius: 12px;
+      --input-radius: 8px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       /* Light mode scrollbars */
-      scrollbar-color: #ccc #f4f7f9;
+      scrollbar-color: #D1D5DB #F9FAFB;
       scrollbar-width: thin;
     }
 
     :root ::-webkit-scrollbar {
-      width: 12px;
-      background: #f4f7f9;
+      width: 8px;
+      background: var(--bg);
     }
 
     :root ::-webkit-scrollbar-thumb {
-      background: #ccc;
-      border-radius: 6px;
-      border: 2px solid #f4f7f9;
+      background: #D1D5DB;
+      border-radius: 4px;
+      border: 2px solid var(--bg);
     }
 
     :root ::-webkit-scrollbar-thumb:hover {
-      background: #b0b0b0;
+      background: #9CA3AF;
     }
 
     [data-theme="dark"] {
       /* Dark mode variables */
-      --primary: #3B82F6;
-      --primary-hover: #2563EB;
-      --bg: #1f2937;
-      --card-bg: #374151;
-      --button-primary: #3B82F6;
-      --button-secondary: #60A5FA;
-      --button-shadow: rgba(59, 130, 246, 0.3);
-      --button-text: #fff;
-      --text-color: #e5e7eb;
-      --label-color: #d1d5db;
-      --input-border: #4b5563;
-      --result-bg: #2d3748;
-      --switch-bg: #4b5563;
-      --switch-thumb: #e5e7eb;
-      --gray-border: #4b5563;
+      --primary: #6366F1;
+      --primary-hover: #4F46E5;
+      --bg: #111827;
+      --card-bg: #1F2937;
+      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+      --button-primary: #6366F1;
+      --button-secondary: #818CF8;
+      --button-shadow: rgba(99, 102, 241, 0.25);
+      --button-text: #FFFFFF;
+      --text-color: #F9FAFB;
+      --label-color: #E5E7EB;
+      --input-border: #374151;
+      --input-focus: #6366F1;
+      --result-bg: #374151;
+      --switch-bg: #4B5563;
+      --switch-thumb: #E5E7EB;
+      --gray-border: #4B5563;
       /* Dark mode scrollbars */
-      scrollbar-color: #4b5563 #374151;
+      scrollbar-color: #4B5563 #111827;
       scrollbar-width: thin;
     }
 
     [data-theme="dark"] ::-webkit-scrollbar {
-      width: 12px;
-      background: #374151;
+      width: 8px;
+      background: var(--bg);
     }
 
     [data-theme="dark"] ::-webkit-scrollbar-thumb {
-      background: #4b5563;
-      border-radius: 6px;
-      border: 2px solid #374151;
+      background: #4B5563;
+      border-radius: 4px;
+      border: 2px solid var(--bg);
     }
 
     [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-      background: #6b7280;
+      background: #6B7280;
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, sans-serif;
+      font-family: var(--font-family);
       background: var(--bg);
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       min-height: 100vh;
       margin: 0;
       color: var(--text-color);
-      transition: background-color 0.3s ease, color 0.3s ease;
-      padding: 20px;
+      transition: background-color var(--transition), color var(--transition);
+      padding: 24px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
+    
+    /* Import Inter font */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
     .controls-wrapper {
       display: flex;
@@ -100,40 +115,49 @@
       align-items: center;
       width: 100%;
       max-width: 450px;
-      margin-bottom: 10px;
+      margin-bottom: 16px;
+      padding: 0 4px;
     }
     
     .language-selector {
       display: flex;
       align-items: center;
-      margin-bottom: 10px;
-      width: 100%;
-      max-width: 450px;
+      width: auto;
       justify-content: flex-start;
     }
     
     .language-selector label {
       margin-right: 10px;
       font-weight: 500;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: var(--label-color);
       margin-bottom: 0;
     }
     
     .language-selector select {
-      padding: 4px 8px;
-      border-radius: 6px;
+      padding: 6px 10px;
+      border-radius: var(--input-radius);
       border: 1px solid var(--input-border);
       background-color: var(--card-bg);
       color: var(--text-color);
       font-size: 0.9rem;
       cursor: pointer;
-      transition: border-color 0.3s ease;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      font-family: var(--font-family);
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 16px;
+      padding-right: 28px;
     }
     
     .language-selector select:focus {
       outline: none;
-      border-color: var(--primary);
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
 
     .theme-switch {
@@ -144,7 +168,7 @@
     .theme-switch-label {
       margin-right: 10px;
       font-weight: 500;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: var(--label-color);
       line-height: 1;
       display: flex;
@@ -154,7 +178,7 @@
     .switch {
       position: relative;
       display: inline-block;
-      width: 50px;
+      width: 48px;
       height: 24px;
     }
 
@@ -172,7 +196,7 @@
       right: 0;
       bottom: 0;
       background-color: var(--switch-bg);
-      transition: .3s;
+      transition: background-color var(--transition), border-color var(--transition);
       border-radius: 24px;
       border: 1px solid var(--gray-border);
     }
@@ -185,53 +209,68 @@
       left: 3px;
       bottom: 2px;
       background-color: var(--switch-thumb);
-      transition: .3s;
+      transition: transform var(--transition), background-color var(--transition);
       border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     input:checked+.slider {
-      background-color: var(--switch-bg);
+      background-color: var(--primary);
+      border-color: var(--primary);
     }
 
     input:checked+.slider:before {
-      transform: translateX(25px);
+      transform: translateX(24px);
+      background-color: white;
     }
 
     .container {
       background: var(--card-bg);
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 2.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
       max-width: 450px;
       width: 100%;
-      transition: background-color 0.3s ease;
-      margin-top: 10px;
+      transition: background-color var(--transition), box-shadow var(--transition);
+      margin-top: 16px;
     }
 
     h1 {
       margin-top: 0;
-      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 1.75rem;
+      font-weight: 700;
       text-align: center;
       color: var(--text-color);
+      line-height: 1.3;
     }
 
     label {
       display: block;
       margin-bottom: 0.5rem;
-      font-weight: 600;
+      font-weight: 500;
       color: var(--label-color);
+      font-size: 0.95rem;
     }
 
     input[type="number"] {
       width: 100%;
-      padding: 0.5rem;
+      padding: 0.75rem 1rem;
       border: 1px solid var(--input-border);
-      border-radius: 6px;
-      margin-bottom: 1rem;
+      border-radius: var(--input-radius);
+      margin-bottom: 1.25rem;
       font-size: 1rem;
       background-color: var(--card-bg);
       color: var(--text-color);
-      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      box-sizing: border-box;
+      font-family: var(--font-family);
+    }
+    
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
 
     .btn-wrapper {
@@ -239,9 +278,9 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 0.5rem 0;
+      margin: 1rem 0;
       overflow: hidden;
-      border-radius: 8px;
+      border-radius: var(--input-radius);
     }
 
     .btn {
@@ -253,22 +292,26 @@
       background: var(--button-primary);
       color: var(--button-text);
       border: none;
-      border-radius: 8px;
+      border-radius: var(--input-radius);
       cursor: pointer;
       z-index: 1;
-      transition: all 0.3s ease;
+      transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition);
       overflow: hidden;
       transform: translateZ(0);
-      box-shadow: 0 6px 20px -6px var(--button-shadow);
+      box-shadow: 0 4px 12px -2px var(--button-shadow);
+      font-family: var(--font-family);
+      letter-spacing: 0.01em;
     }
 
     .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px var(--button-shadow);
+      box-shadow: 0 8px 16px -4px var(--button-shadow);
+      background: var(--primary-hover);
     }
 
     .btn:active {
-      transform: translateY(1px);
+      transform: translateY(0);
+      box-shadow: 0 2px 8px -4px var(--button-shadow);
     }
 
     .btn::before {
@@ -278,15 +321,15 @@
       left: -75%;
       width: 50%;
       height: 100%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
       transform: skewX(-25deg);
       z-index: 2;
-      transition: all 0.75s ease;
+      transition: all 0.6s ease;
     }
 
     .btn:hover::before {
       left: 125%;
-      transition: all 0.75s ease;
+      transition: all 0.6s ease;
     }
 
     .btn::after {
@@ -296,7 +339,7 @@
       background: linear-gradient(120deg, var(--button-primary), var(--button-secondary), var(--button-primary));
       background-size: 200% 100%;
       z-index: -1;
-      animation: gradient-shift 3s ease infinite;
+      animation: gradient-shift 4s ease infinite;
     }
 
     @keyframes gradient-shift {
@@ -315,32 +358,32 @@
       inset: -4px;
       background: transparent;
       z-index: 0;
-      border-radius: 8px;
+      border-radius: var(--input-radius);
     }
 
     .pulse::after {
       content: '';
       position: absolute;
       inset: 0;
-      border-radius: 8px;
-      box-shadow: 0 0 20px 5px var(--button-shadow);
-      animation: pulse 2s ease-out infinite;
+      border-radius: var(--input-radius);
+      box-shadow: 0 0 16px 4px var(--button-shadow);
+      animation: pulse 3s ease-out infinite;
     }
 
     @keyframes pulse {
       0% {
-        opacity: 0.8;
-        transform: scale(0.95);
+        opacity: 0.6;
+        transform: scale(0.97);
       }
 
       50% {
-        opacity: 0.3;
-        transform: scale(1.02);
+        opacity: 0.2;
+        transform: scale(1.01);
       }
 
       100% {
-        opacity: 0.8;
-        transform: scale(0.95);
+        opacity: 0.6;
+        transform: scale(0.97);
       }
     }
 
@@ -354,26 +397,64 @@
 
     .particle {
       position: absolute;
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.5);
       pointer-events: none;
+      opacity: 0.7;
     }
 
     .result {
       background: var(--result-bg);
-      padding: 1rem;
-      border-radius: 6px;
-      margin-top: 1rem;
+      padding: 1.5rem;
+      border-radius: var(--input-radius);
+      margin-top: 1.5rem;
       text-align: center;
-      transition: background-color 0.3s ease;
+      transition: background-color var(--transition);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .result-section {
+      padding: 0.75rem;
+    }
+
+    .result-section:not(:last-child) {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      padding-bottom: 1.25rem;
+    }
+
+    [data-theme="dark"] .result-section:not(:last-child) {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .result p {
-      margin: 0.5rem 0;
+      margin: 0;
       font-size: 1rem;
       color: var(--text-color);
+      line-height: 1.6;
+    }
+    
+    .result-hourly-rate {
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 1.1rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .result-time-needed {
+      margin-bottom: 0.75rem;
+    }
+    
+    .result-equivalent {
+      opacity: 0.75;
+    }
+    
+    .result-paychecks {
+      font-weight: 500;
     }
 
     /* Dark/Light mode icons */
@@ -440,7 +521,7 @@
   </div>
 
   <div class="container">
-    <h1 id="pageTitle">How much of your work time does it cost?</h1><br>
+    <h1 id="pageTitle">How much of your work time does it cost?</h1>
     <label for="salary" id="salaryLabel">Monthly net salary</label>
     <input type="number" id="salary" value="3510.92" step="0.01" min="0" />
 
@@ -450,8 +531,6 @@
     <label for="amount" id="amountLabel">Cost of item</label>
     <input type="number" id="amount" value="100" step="0.01" min="0" />
 
-    <br><br>
-
     <div class="btn-wrapper">
       <div class="pulse"></div>
       <button id="calculate" class="btn">Calculate</button>
@@ -459,8 +538,16 @@
     </div>
 
     <div class="result" id="result" style="display: none;">
-      <p id="rate"></p>
-      <p id="timeNeeded"></p>
+      <div class="result-section">
+        <p class="result-hourly-rate" id="rate"></p>
+      </div>
+      <div class="result-section">
+        <p class="result-time-needed" id="timeBasic"></p>
+        <p class="result-equivalent" id="timeEquivalent"></p>
+      </div>
+      <div class="result-section">
+        <p class="result-paychecks" id="paychecks"></p>
+      </div>
     </div>
   </div>
 
@@ -554,7 +641,9 @@
     const calculateButton = document.getElementById('calculate');
     const resultDiv = document.getElementById('result');
     const rateOutput = document.getElementById('rate');
-    const timeNeededOutput = document.getElementById('timeNeeded');
+    const timeBasicOutput = document.getElementById('timeBasic');
+    const timeEquivalentOutput = document.getElementById('timeEquivalent');
+    const paychecksOutput = document.getElementById('paychecks');
     const particlesContainer = document.querySelector('.particles-container');
     const button = document.querySelector('.btn');
     const themeToggle = document.getElementById('themeToggle');
@@ -683,39 +772,44 @@
       // Get currency symbol from translations
       const currencySymbol = t.currencySymbol || '$';
 
+      // Set hourly rate
       rateOutput.textContent = formatString(t.hourlyRate, `${rate.toFixed(2)} ${currencySymbol}`);
       
-      let timeText = formatString(t.timeNeeded, `${amount.toFixed(2)} ${currencySymbol}`, hours, minutes);
+      // Set basic time needed
+      timeBasicOutput.textContent = formatString(t.timeNeeded, `${amount.toFixed(2)} ${currencySymbol}`, hours, minutes);
       
-      // Add additional time period information
+      // Set equivalent time period
+      let equivalentText = '';
       if (years > 0) {
-        timeText += `\n\n${t.equalTo} ${years} ${getPlural(years, t.year, t.years)}`;
+        equivalentText = `${t.equalTo} ${years} ${getPlural(years, t.year, t.years)}`;
         if (remainingMonths > 0) {
-          timeText += ` ${t.and} ${remainingMonths} ${getPlural(remainingMonths, t.month, t.months)}`;
+          equivalentText += ` ${t.and} ${remainingMonths} ${getPlural(remainingMonths, t.month, t.months)}`;
         }
-        timeText += '.';
+        equivalentText += '.';
       } else if (months > 0) {
-        timeText += `\n\n${t.equalTo} ${months} ${getPlural(months, t.month, t.months)}`;
+        equivalentText = `${t.equalTo} ${months} ${getPlural(months, t.month, t.months)}`;
         if (remainingWeeks > 0) {
-          timeText += ` ${t.and} ${remainingWeeks} ${getPlural(remainingWeeks, t.week, t.weeks)}`;
+          equivalentText += ` ${t.and} ${remainingWeeks} ${getPlural(remainingWeeks, t.week, t.weeks)}`;
         }
-        timeText += '.';
+        equivalentText += '.';
       } else if (weeks > 0) {
-        timeText += `\n\n${t.equalTo} ${weeks} ${getPlural(weeks, t.week, t.weeks)}`;
+        equivalentText = `${t.equalTo} ${weeks} ${getPlural(weeks, t.week, t.weeks)}`;
         if (remainingDays > 0) {
-          timeText += ` ${t.and} ${remainingDays} ${getPlural(remainingDays, t.day, t.days)}`;
+          equivalentText += ` ${t.and} ${remainingDays} ${getPlural(remainingDays, t.day, t.days)}`;
         }
-        timeText += '.';
+        equivalentText += '.';
       } else if (days > 0) {
-        timeText += `\n\n${t.equalTo} ${days} ${getPlural(days, t.day, t.days)}`;
+        equivalentText = `${t.equalTo} ${days} ${getPlural(days, t.day, t.days)}`;
         if (remainingHours > 0) {
-          timeText += ` ${t.and} ${remainingHours} ${getPlural(remainingHours, t.hour, t.hours)}`;
+          equivalentText += ` ${t.and} ${remainingHours} ${getPlural(remainingHours, t.hour, t.hours)}`;
         }
-        timeText += '.';
+        equivalentText += '.';
       }
+      timeEquivalentOutput.textContent = equivalentText;
 
-      // Add paycheck information if more than one paycheck is needed
-      if (paychecksNeeded > 1) {
+      // Set paycheck information
+      const paychecksSection = paychecksOutput.parentElement;
+      if (paychecksNeeded >= 0.1) { // Only show if it's at least 10% of a paycheck
         // Handle Polish special case with array of plural forms
         let paychecksText = t.paychecksNeeded;
         if (Array.isArray(paychecksText)) {
@@ -727,10 +821,12 @@
             paychecksText = paychecksText[2];
           }
         }
-        timeText += `\n\n${formatString(paychecksText, paychecksNeeded.toFixed(1))}`;
+        paychecksOutput.textContent = formatString(paychecksText, paychecksNeeded.toFixed(1));
+        paychecksSection.style.display = 'block';
+      } else {
+        // Hide the paychecks section if it's less than 10% of a paycheck
+        paychecksSection.style.display = 'none';
       }
-
-      timeNeededOutput.textContent = timeText;
       resultDiv.style.display = 'block';
 
       createParticleExplosion();
@@ -741,20 +837,20 @@
      * Limited number of particles to maintain performance
      */
     function createFloatingParticles() {
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 3; i++) {
         setTimeout(() => {
           const particle = document.createElement('div');
           particle.className = 'particle';
 
-          const xPos = 10 + Math.random() * 80;
+          const xPos = 15 + Math.random() * 70;
           particle.style.left = `${xPos}%`;
           particle.style.bottom = '0';
 
-          const size = 3 + Math.random() * 4;
+          const size = 2 + Math.random() * 3;
           particle.style.width = `${size}px`;
           particle.style.height = `${size}px`;
 
-          particle.style.opacity = 0.3 + Math.random() * 0.5;
+          particle.style.opacity = 0.2 + Math.random() * 0.3;
 
           particlesContainer.appendChild(particle);
 
@@ -762,18 +858,18 @@
           let opacity = parseFloat(particle.style.opacity);
 
           const rise = setInterval(() => {
-            bottom += 0.7;
-            opacity -= 0.005;
+            bottom += 0.5;
+            opacity -= 0.004;
 
             particle.style.bottom = `${bottom}px`;
             particle.style.opacity = opacity;
 
-            if (bottom > 80 || opacity <= 0) {
+            if (bottom > 70 || opacity <= 0) {
               clearInterval(rise);
               particle.remove();
             }
           }, 16);
-        }, i * 200);
+        }, i * 250);
       }
     }
 
@@ -787,30 +883,30 @@
       const centerX = (buttonRect.width / 2);
       const centerY = (buttonRect.height / 2);
 
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 15; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
 
         particle.style.left = `${centerX}px`;
         particle.style.top = `${centerY}px`;
 
-        const size = 2 + Math.random() * 5;
+        const size = 2 + Math.random() * 3;
         particle.style.width = `${size}px`;
         particle.style.height = `${size}px`;
 
-        particle.style.opacity = 0.5 + Math.random() * 0.5;
+        particle.style.opacity = 0.4 + Math.random() * 0.3;
 
-        // Create blue particles with slight variation
-        const hue = 210 + Math.random() * 30;
-        const saturation = 80 + Math.random() * 20;
-        const lightness = 60 + Math.random() * 20;
+        // Create particles with color matching the button
+        const hue = 240 + Math.random() * 15; // Indigo/violet hue for our new color scheme
+        const saturation = 70 + Math.random() * 20;
+        const lightness = 60 + Math.random() * 15;
         particle.style.background = `hsla(${hue}, ${saturation}%, ${lightness}%, ${particle.style.opacity})`;
 
         particlesContainer.appendChild(particle);
 
         // Calculate random trajectory
         const angle = Math.random() * Math.PI * 2;
-        const speed = 1 + Math.random() * 5;
+        const speed = 0.8 + Math.random() * 3.5;
         const vx = Math.cos(angle) * speed;
         const vy = Math.sin(angle) * speed;
 
@@ -821,7 +917,7 @@
         const move = setInterval(() => {
           x += vx;
           y += vy;
-          opacity -= 0.02;
+          opacity -= 0.015;
 
           particle.style.left = `${x}px`;
           particle.style.top = `${y}px`;
@@ -847,7 +943,7 @@
       localStorage.setItem('theme', newTheme);
 
       // Add a subtle animation effect when changing themes
-      document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+      document.body.style.transition = `background-color var(--transition), color var(--transition)`;
       setTimeout(() => {
         document.body.style.transition = '';
       }, 300);
