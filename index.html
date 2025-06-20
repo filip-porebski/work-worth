@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ile czasu twojej pracy to kosztuje?</title>
+  <title>How much of your work time does it cost?</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <style>
     :root {
       /* Light mode variables */
@@ -93,13 +94,46 @@
       padding: 20px;
     }
 
-    .theme-switch-wrapper {
+    .controls-wrapper {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
       width: 100%;
       max-width: 450px;
-      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    
+    .language-selector {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      width: 100%;
+      max-width: 450px;
+      justify-content: flex-start;
+    }
+    
+    .language-selector label {
+      margin-right: 10px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--label-color);
+      margin-bottom: 0;
+    }
+    
+    .language-selector select {
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--input-border);
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+    }
+    
+    .language-selector select:focus {
+      outline: none;
+      border-color: var(--primary);
     }
 
     .theme-switch {
@@ -386,9 +420,18 @@
 </head>
 
 <body>
-  <div class="theme-switch-wrapper">
+  <div class="controls-wrapper">
+    <div class="language-selector">
+      <label for="languageSelect" id="languageLabel">Language:</label>
+      <select id="languageSelect">
+        <option value="en">English</option>
+        <option value="pl">Polski</option>
+        <option value="de">Deutsch</option>
+      </select>
+    </div>
+    
     <div class="theme-switch">
-      <span class="theme-switch-label">Tryb ciemny:</span>
+      <span class="theme-switch-label" id="darkModeLabel">Dark mode:</span>
       <label class="switch">
         <input type="checkbox" id="themeToggle">
         <span class="slider"></span>
@@ -397,21 +440,21 @@
   </div>
 
   <div class="container">
-    <h1>Ile czasu twojej pracy to kosztuje?</h1><br>
-    <label for="salary">Miesięczne wynagrodzenie netto (zł)</label>
+    <h1 id="pageTitle">How much of your work time does it cost?</h1><br>
+    <label for="salary" id="salaryLabel">Monthly net salary</label>
     <input type="number" id="salary" value="3510.92" step="0.01" min="0" />
 
-    <label for="hours">Godzin pracy tygodniowo</label>
+    <label for="hours" id="hoursLabel">Weekly working hours</label>
     <input type="number" id="hours" value="40" step="0.1" min="0" />
 
-    <label for="amount">Kwota wydatku (zł)</label>
+    <label for="amount" id="amountLabel">Cost of item</label>
     <input type="number" id="amount" value="100" step="0.01" min="0" />
 
     <br><br>
 
     <div class="btn-wrapper">
       <div class="pulse"></div>
-      <button id="calculate" class="btn">Oblicz</button>
+      <button id="calculate" class="btn">Calculate</button>
       <div class="particles-container"></div>
     </div>
 
@@ -422,6 +465,88 @@
   </div>
 
   <script>
+    // Translations embedded directly in the code
+    const translations = {
+      en: {
+        "title": "How much of your work time does it cost?",
+        "languageLabel": "Language:",
+        "darkModeLabel": "Dark mode:",
+        "salaryLabel": "Monthly net salary",
+        "hoursLabel": "Weekly working hours",
+        "amountLabel": "Cost of item",
+        "calculateButton": "Calculate",
+        "invalidInputs": "Please enter valid values.",
+        "hourlyRate": "Hourly rate: {0}/h",
+        "timeNeeded": "Work time needed for {0}: {1} hrs {2} mins",
+        "equalTo": "This equals",
+        "year": "year",
+        "years": "years",
+        "month": "month",
+        "months": "months",
+        "week": "week",
+        "weeks": "weeks",
+        "day": "day",
+        "days": "days",
+        "hour": "hour",
+        "hours": "hours",
+        "and": "and",
+        "paychecksNeeded": "You'll need {0} monthly paychecks to buy this.",
+        "currencySymbol": "$"
+      },
+      pl: {
+        "title": "Ile czasu twojej pracy to kosztuje?",
+        "languageLabel": "Język:",
+        "darkModeLabel": "Tryb ciemny:",
+        "salaryLabel": "Miesięczne wynagrodzenie netto",
+        "hoursLabel": "Godzin pracy tygodniowo",
+        "amountLabel": "Kwota wydatku",
+        "calculateButton": "Oblicz",
+        "invalidInputs": "Proszę wprowadzić poprawne wartości.",
+        "hourlyRate": "Stawka godzinowa: {0}/h",
+        "timeNeeded": "Czas pracy potrzebny na {0}: {1} godz. {2} min.",
+        "equalTo": "To równa się",
+        "year": "rokowi",
+        "years": ["latom", "latom"],
+        "month": "miesiącowi",
+        "months": ["miesiącom", "miesiącom"],
+        "week": "tygodniowi",
+        "weeks": ["tygodniom", "tygodniom"],
+        "day": "dniowi",
+        "days": ["dniom", "dniom"],
+        "hour": "godzinie",
+        "hours": ["godzinom", "godzinom"],
+        "and": "i",
+        "paychecksNeeded": ["Na kupno potrzebne będzie ci {0} miesięcznej wypłaty.", "Na kupno potrzebne będzie ci {0} miesięcznych wypłat.", "Na kupno potrzebne będzie ci {0} miesięcznych wypłat."],
+        "currencySymbol": "zł"
+      },
+      de: {
+        "title": "Wie viel deiner Arbeitszeit kostet es?",
+        "languageLabel": "Sprache:",
+        "darkModeLabel": "Dunkelmodus:",
+        "salaryLabel": "Monatliches Nettogehalt",
+        "hoursLabel": "Wöchentliche Arbeitsstunden",
+        "amountLabel": "Kosten des Artikels",
+        "calculateButton": "Berechnen",
+        "invalidInputs": "Bitte geben Sie gültige Werte ein.",
+        "hourlyRate": "Stundensatz: {0}/h",
+        "timeNeeded": "Arbeitszeit benötigt für {0}: {1} Std. {2} Min.",
+        "equalTo": "Das entspricht",
+        "year": "Jahr",
+        "years": "Jahren",
+        "month": "Monat",
+        "months": "Monaten",
+        "week": "Woche",
+        "weeks": "Wochen",
+        "day": "Tag",
+        "days": "Tagen",
+        "hour": "Stunde",
+        "hours": "Stunden",
+        "and": "und",
+        "paychecksNeeded": "Sie benötigen {0} monatliche Gehaltszahlungen, um dies zu kaufen.",
+        "currencySymbol": "€"
+      }
+    };
+
     // DOM elements
     const salaryInput = document.getElementById('salary');
     const hoursInput = document.getElementById('hours');
@@ -433,16 +558,89 @@
     const particlesContainer = document.querySelector('.particles-container');
     const button = document.querySelector('.btn');
     const themeToggle = document.getElementById('themeToggle');
+    const languageSelect = document.getElementById('languageSelect');
+
+    // Current language
+    let currentLanguage = 'en';
+    
+    // Helper function to format strings with placeholders
+    function formatString(str, ...args) {
+      return str.replace(/{(\d+)}/g, function(match, number) { 
+        return typeof args[number] != 'undefined' ? args[number] : match;
+      });
+    }
+    
+    // Helper function to get the correct plural form based on count
+    function getPlural(count, singular, plural) {
+      if (!plural) return singular;
+      
+      if (Array.isArray(plural)) {
+        // For Polish: different forms for 1, 2-4, 5+
+        if (count === 1) return singular;
+        if (count < 5) return plural[0];
+        return plural[1];
+      }
+      
+      return count === 1 ? singular : plural;
+    }
+    
+    // Function to update all text elements based on the selected language
+    function updateLanguage(lang) {
+      // Set HTML lang attribute
+      document.documentElement.setAttribute('lang', lang);
+      
+      const t = translations[lang];
+      
+      // Update page title
+      document.title = t.title;
+      
+      // Update UI elements
+      document.getElementById('pageTitle').textContent = t.title;
+      document.getElementById('languageLabel').textContent = t.languageLabel;
+      document.getElementById('darkModeLabel').textContent = t.darkModeLabel;
+      document.getElementById('salaryLabel').textContent = t.salaryLabel;
+      document.getElementById('hoursLabel').textContent = t.hoursLabel;
+      document.getElementById('amountLabel').textContent = t.amountLabel;
+      calculateButton.textContent = t.calculateButton;
+      
+      // Save language preference
+      localStorage.setItem('language', lang);
+      currentLanguage = lang;
+      
+      // If there are results displayed, recalculate to update the text
+      if (resultDiv.style.display !== 'none') {
+        calculate();
+      }
+    }
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function () {
       // Fix input format (replace comma with dot for proper number parsing)
       salaryInput.value = salaryInput.value.replace(',', '.');
+      
+      // Set initial language based on browser preference or saved preference
+      const savedLanguage = localStorage.getItem('language');
+      const browserLanguage = navigator.language.split('-')[0];
+      
+      if (savedLanguage && ['en', 'pl', 'de'].includes(savedLanguage)) {
+        currentLanguage = savedLanguage;
+      } else if (['en', 'pl', 'de'].includes(browserLanguage)) {
+        currentLanguage = browserLanguage;
+      }
+      
+      // Set the language selector to match the current language
+      languageSelect.value = currentLanguage;
+      
+      // Update all text elements to the current language
+      updateLanguage(currentLanguage);
 
       // Event listeners
       calculateButton.addEventListener('click', calculate);
       button.addEventListener('mouseover', createFloatingParticles);
       themeToggle.addEventListener('change', toggleTheme);
+      languageSelect.addEventListener('change', function() {
+        updateLanguage(this.value);
+      });
 
       // Create occasional floating particles
       setInterval(createFloatingParticles, 2000);
@@ -452,9 +650,12 @@
       const salary = parseFloat(salaryInput.value);
       const weeklyHours = parseFloat(hoursInput.value);
       const amount = parseFloat(amountInput.value);
+      
+      const lang = currentLanguage;
+      const t = translations[lang];
 
       if (isNaN(salary) || isNaN(weeklyHours) || isNaN(amount) || weeklyHours <= 0) {
-        alert('Proszę wprowadzić poprawne wartości.');
+        alert(t.invalidInputs);
         return;
       }
 
@@ -478,41 +679,55 @@
 
       // Calculate number of paychecks needed
       const paychecksNeeded = amount / salary;
-
-      rateOutput.textContent = `Stawka godzinowa: ${rate.toFixed(2)} zł/h`;
       
-      let timeText = `Czas pracy potrzebny na ${amount.toFixed(2)} zł: ${hours} godz. ${minutes} min.`;
+      // Get currency symbol from translations
+      const currencySymbol = t.currencySymbol || '$';
+
+      rateOutput.textContent = formatString(t.hourlyRate, `${rate.toFixed(2)} ${currencySymbol}`);
+      
+      let timeText = formatString(t.timeNeeded, `${amount.toFixed(2)} ${currencySymbol}`, hours, minutes);
       
       // Add additional time period information
       if (years > 0) {
-        timeText += `\n\nTo równa się ${years} ${years === 1 ? 'rokowi' : years < 5 ? 'latom' : 'latom'}`;
+        timeText += `\n\n${t.equalTo} ${years} ${getPlural(years, t.year, t.years)}`;
         if (remainingMonths > 0) {
-          timeText += ` i ${remainingMonths} ${remainingMonths === 1 ? 'miesiącowi' : remainingMonths < 5 ? 'miesiącom' : 'miesiącom'}`;
+          timeText += ` ${t.and} ${remainingMonths} ${getPlural(remainingMonths, t.month, t.months)}`;
         }
         timeText += '.';
       } else if (months > 0) {
-        timeText += `\n\nTo równa się ${months} ${months === 1 ? 'miesiącowi' : months < 5 ? 'miesiącom' : 'miesiącom'}`;
+        timeText += `\n\n${t.equalTo} ${months} ${getPlural(months, t.month, t.months)}`;
         if (remainingWeeks > 0) {
-          timeText += ` i ${remainingWeeks} ${remainingWeeks === 1 ? 'tygodniowi' : remainingWeeks < 5 ? 'tygodniom' : 'tygodniom'}`;
+          timeText += ` ${t.and} ${remainingWeeks} ${getPlural(remainingWeeks, t.week, t.weeks)}`;
         }
         timeText += '.';
       } else if (weeks > 0) {
-        timeText += `\n\nTo równa się ${weeks} ${weeks === 1 ? 'tygodniowi' : weeks < 5 ? 'tygodniom' : 'tygodniom'}`;
+        timeText += `\n\n${t.equalTo} ${weeks} ${getPlural(weeks, t.week, t.weeks)}`;
         if (remainingDays > 0) {
-          timeText += ` i ${remainingDays} ${remainingDays === 1 ? 'dniowi' : remainingDays < 5 ? 'dniom' : 'dniom'}`;
+          timeText += ` ${t.and} ${remainingDays} ${getPlural(remainingDays, t.day, t.days)}`;
         }
         timeText += '.';
       } else if (days > 0) {
-        timeText += `\n\nTo równa się ${days} ${days === 1 ? 'dniowi' : days < 5 ? 'dniom' : 'dniom'}`;
+        timeText += `\n\n${t.equalTo} ${days} ${getPlural(days, t.day, t.days)}`;
         if (remainingHours > 0) {
-          timeText += ` i ${remainingHours} ${remainingHours === 1 ? 'godzinie' : remainingHours < 5 ? 'godzinom' : 'godzinom'}`;
+          timeText += ` ${t.and} ${remainingHours} ${getPlural(remainingHours, t.hour, t.hours)}`;
         }
         timeText += '.';
       }
 
       // Add paycheck information if more than one paycheck is needed
       if (paychecksNeeded > 1) {
-        timeText += `\n\nNa kupno potrzebne będzie ci ${paychecksNeeded.toFixed(1)} ${paychecksNeeded === 1 ? 'miesięcznej wypłaty' : paychecksNeeded < 5 ? 'miesięcznych wypłat' : 'miesięcznych wypłat'}.`;
+        // Handle Polish special case with array of plural forms
+        let paychecksText = t.paychecksNeeded;
+        if (Array.isArray(paychecksText)) {
+          if (paychecksNeeded === 1) {
+            paychecksText = paychecksText[0];
+          } else if (paychecksNeeded < 5) {
+            paychecksText = paychecksText[1];
+          } else {
+            paychecksText = paychecksText[2];
+          }
+        }
+        timeText += `\n\n${formatString(paychecksText, paychecksNeeded.toFixed(1))}`;
       }
 
       timeNeededOutput.textContent = timeText;
