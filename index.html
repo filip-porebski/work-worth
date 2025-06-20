@@ -586,17 +586,18 @@
     }
   </style>
   <script>
-    // Set theme as early as possible to avoid FOUC
-    (function() {
+    /**
+     * Initialize theme settings before DOM is fully loaded to prevent flash of unstyled content.
+     * Prioritizes user preferences from localStorage, falls back to system preferences.
+     */
+    (function initializeTheme() {
       const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-      }
-      // Listen for OS theme changes and update theme if user hasn't chosen manually
+      const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const themeToApply = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+      
+      document.documentElement.setAttribute('data-theme', themeToApply);
+      
+      // Synchronize with system theme changes when no explicit user preference exists
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
         if (!localStorage.getItem('theme')) {
           document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
@@ -694,7 +695,16 @@
   </main>
 
   <script>
-    // Translations embedded directly in the code
+    /**
+     * Application core functionality for work time cost calculator.
+     * @module WorkTimeCostCalculator
+     */
+    
+    /**
+     * Localization data for all supported languages.
+     * Each language contains translation keys for UI elements and calculation results.
+     * @type {Object.<string, Object.<string, string|Array<string>>>}
+     */
     const translations = {
       en: {
         "title": "How much of your work time does it cost?",
@@ -788,27 +798,40 @@
       }
     };
 
-    // DOM elements
-    const salaryInput = document.getElementById('salary');
-    const hoursInput = document.getElementById('hours');
-    const amountInput = document.getElementById('amount');
-    const calculateButton = document.getElementById('calculate');
-    const resultDiv = document.getElementById('result');
-    const rateOutput = document.getElementById('rate');
-    const timeBasicOutput = document.getElementById('timeBasic');
-    const timeEquivalentOutput = document.getElementById('timeEquivalent');
-    const paychecksOutput = document.getElementById('paychecks');
-    const particlesContainer = document.querySelector('.particles-container');
-    const button = document.querySelector('.btn');
-    const themeToggle = document.getElementById('themeToggle');
-    const languageSelect = document.getElementById('languageSelect');
-    const currencySelect = document.getElementById('currencySelect');
+    /**
+     * DOM element references used throughout the application.
+     * @type {Object.<string, HTMLElement>}
+     */
+    const elements = {
+      salary: document.getElementById('salary'),
+      hours: document.getElementById('hours'),
+      amount: document.getElementById('amount'),
+      calculate: document.getElementById('calculate'),
+      result: document.getElementById('result'),
+      rate: document.getElementById('rate'),
+      timeBasic: document.getElementById('timeBasic'),
+      timeEquivalent: document.getElementById('timeEquivalent'),
+      paychecks: document.getElementById('paychecks'),
+      particles: document.querySelector('.particles-container'),
+      button: document.querySelector('.btn'),
+      themeToggle: document.getElementById('themeToggle'),
+      languageSelect: document.getElementById('languageSelect'),
+      currencySelect: document.getElementById('currencySelect')
+    };
 
-    // Current language and currency
-    let currentLanguage = 'en';
-    let currentCurrency = 'USD';
+    /**
+     * Application state.
+     * @type {Object}
+     */
+    const state = {
+      language: 'en',
+      currency: 'USD'
+    };
     
-    // Currency symbols mapping
+    /**
+     * Currency symbols mapping for supported currencies.
+     * @type {Object.<string, string>}
+     */
     const currencySymbols = {
       'USD': '$',
       'EUR': '€',
@@ -842,436 +865,561 @@
       'PHP': '₱'
     };
     
-    // Helper function to format strings with placeholders
-    function formatString(str, ...args) {
-      return str.replace(/{(\d+)}/g, function(match, number) { 
-        return typeof args[number] != 'undefined' ? args[number] : match;
-      });
-    }
-    
-    // Helper function to get the correct plural form based on count
-    function getPlural(count, singular, plural) {
-      if (!plural) return singular;
+    /**
+     * Visual effects module for particle animations.
+     * @namespace effects
+     */
+    const effects = {
+      /**
+       * Creates ambient floating particles.
+       * Generates a small number of particles that float upward.
+       */
+      createFloatingParticles() {
+        const particleCount = 3;
+        
+        for (let i = 0; i < particleCount; i++) {
+          setTimeout(() => {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Randomize position and size
+            const xPos = 15 + Math.random() * 70;
+            const size = 2 + Math.random() * 3;
+            const initialOpacity = 0.2 + Math.random() * 0.3;
+            
+            // Set initial styles
+            particle.style.left = `${xPos}%`;
+            particle.style.bottom = '0';
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.opacity = initialOpacity;
+            
+            elements.particles.appendChild(particle);
+            
+            // Animate particle
+            let bottom = 0;
+            let opacity = initialOpacity;
+            const FRAME_RATE = 16; // ~60fps
+            
+            const rise = setInterval(() => {
+              bottom += 0.5;
+              opacity -= 0.004;
+              
+              particle.style.bottom = `${bottom}px`;
+              particle.style.opacity = opacity;
+              
+              if (bottom > 70 || opacity <= 0) {
+                clearInterval(rise);
+                particle.remove();
+              }
+            }, FRAME_RATE);
+          }, i * 250);
+        }
+      },
       
-      if (Array.isArray(plural)) {
-        // For Polish: different forms for 1, 2-4, 5+
-        if (count === 1) return singular;
-        if (count < 5) return plural[0];
-        return plural[1];
+      /**
+       * Creates a burst of particles from the button center.
+       * Generates particles that move outward in random directions.
+       */
+      createParticleExplosion() {
+        const buttonRect = elements.button.getBoundingClientRect();
+        const centerX = buttonRect.width / 2;
+        const centerY = buttonRect.height / 2;
+        const particleCount = 15;
+        
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          
+          // Set initial position at center of button
+          particle.style.left = `${centerX}px`;
+          particle.style.top = `${centerY}px`;
+          
+          // Randomize size and opacity
+          const size = 2 + Math.random() * 3;
+          const initialOpacity = 0.4 + Math.random() * 0.3;
+          
+          particle.style.width = `${size}px`;
+          particle.style.height = `${size}px`;
+          particle.style.opacity = initialOpacity;
+          
+          // Create color matching the button theme
+          const hue = 240 + Math.random() * 15;
+          const saturation = 70 + Math.random() * 20;
+          const lightness = 60 + Math.random() * 15;
+          particle.style.background = `hsla(${hue}, ${saturation}%, ${lightness}%, ${initialOpacity})`;
+          
+          elements.particles.appendChild(particle);
+          
+          // Calculate random trajectory
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 0.8 + Math.random() * 3.5;
+          const vx = Math.cos(angle) * speed;
+          const vy = Math.sin(angle) * speed;
+          
+          // Animation variables
+          let x = centerX;
+          let y = centerY;
+          let opacity = initialOpacity;
+          const FRAME_RATE = 16; // ~60fps
+          
+          const move = setInterval(() => {
+            x += vx;
+            y += vy;
+            opacity -= 0.015;
+            
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            particle.style.opacity = opacity;
+            
+            const isOutOfBounds = 
+              opacity <= 0 || 
+              x < 0 || x > buttonRect.width ||
+              y < 0 || y > buttonRect.height;
+              
+            if (isOutOfBounds) {
+              clearInterval(move);
+              particle.remove();
+            }
+          }, FRAME_RATE);
+        }
       }
-      
-      return count === 1 ? singular : plural;
-    }
+    };
     
     /**
-     * Smoothly scrolls to an element with better cross-browser and mobile support
-     * @param {HTMLElement} element - The element to scroll to
-     * @param {Object} options - Scrolling options
+     * Utility functions for string formatting, UI manipulation, and calculations.
+     * @namespace utils
      */
-    function smoothScrollToElement(element, options = {}) {
-      const defaultOptions = {
-        behavior: 'smooth',
-        block: 'center',
-        delay: 300,
-        duration: 1000 // Longer duration for slower scrolling
-      };
+    const utils = {
+      /**
+       * Formats a string by replacing placeholders with provided arguments.
+       * @param {string} str - Template string with {n} placeholders
+       * @param {...*} args - Values to insert into the template
+       * @returns {string} Formatted string
+       * @example
+       * // returns "Hello, John!"
+       * formatString("Hello, {0}!", "John")
+       */
+      formatString(str, ...args) {
+        return str.replace(/{(\d+)}/g, (match, index) => 
+          args[index] !== undefined ? args[index] : match
+        );
+      },
       
-      const opts = { ...defaultOptions, ...options };
+      /**
+       * Returns the appropriate plural form based on count.
+       * Handles special cases for languages with complex plural rules (e.g., Polish).
+       * @param {number} count - The quantity to determine plural form
+       * @param {string} singular - Singular form
+       * @param {string|Array<string>} plural - Plural form(s)
+       * @returns {string} Appropriate form based on count
+       */
+      getPlural(count, singular, plural) {
+        if (!plural) return singular;
+        
+        if (Array.isArray(plural)) {
+          // Handle languages with multiple plural forms (e.g., Polish)
+          if (count === 1) return singular;
+          if (count < 5) return plural[0];
+          return plural[1];
+        }
+        
+        return count === 1 ? singular : plural;
+      },
       
-      // Check if the element is already fully visible
-      const rect = element.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      
-      // Only scroll if the element is not fully visible in the viewport
-      if (rect.bottom > windowHeight || rect.top < 0) {
-        setTimeout(() => {
-          // Use native scrollIntoView with fallback for older browsers
-          if ('scrollBehavior' in document.documentElement.style) {
-            // Apply the smooth scrolling
-            element.scrollIntoView({ 
-              behavior: opts.behavior, 
-              block: opts.block 
-            });
-          } else {
-            // Custom smooth scrolling implementation for browsers without native support
-            const startPosition = window.pageYOffset;
-            const targetPosition = element.getBoundingClientRect().top + window.pageYOffset;
-            const distance = targetPosition - startPosition;
-            
-            // Don't scroll if already very close to target
-            if (Math.abs(distance) < 10) return;
-            
-            let startTime = null;
-            
-            function animation(currentTime) {
-              if (startTime === null) startTime = currentTime;
-              const timeElapsed = currentTime - startTime;
-              const progress = Math.min(timeElapsed / opts.duration, 1);
-              
-              // Easing function for smoother animation
-              const ease = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-              
-              window.scrollTo(0, startPosition + distance * ease(progress));
-              
-              if (timeElapsed < opts.duration) {
-                requestAnimationFrame(animation);
-              }
+      /**
+       * Smoothly scrolls to an element with cross-browser and mobile support.
+       * @param {HTMLElement} element - Target element to scroll to
+       * @param {Object} options - Scrolling configuration
+       * @param {string} [options.behavior='smooth'] - Scroll behavior
+       * @param {string} [options.block='center'] - Vertical alignment
+       * @param {number} [options.delay=300] - Delay before scrolling starts (ms)
+       * @param {number} [options.duration=1000] - Animation duration (ms)
+       * @returns {boolean} Whether scrolling was initiated
+       */
+      smoothScrollToElement(element, options = {}) {
+        const defaultOptions = {
+          behavior: 'smooth',
+          block: 'center',
+          delay: 300,
+          duration: 1000
+        };
+        
+        const opts = { ...defaultOptions, ...options };
+        const rect = element.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        
+        // Only scroll if element is not fully visible
+        if (rect.bottom > windowHeight || rect.top < 0) {
+          setTimeout(() => {
+            if ('scrollBehavior' in document.documentElement.style) {
+              // Use native smooth scrolling when available
+              element.scrollIntoView({ 
+                behavior: opts.behavior, 
+                block: opts.block 
+              });
+            } else {
+              // Fallback for browsers without native smooth scrolling
+              this.animateScroll(
+                window.pageYOffset,
+                element.getBoundingClientRect().top + window.pageYOffset,
+                opts.duration
+              );
             }
-            
+          }, opts.delay);
+          
+          return true;
+        }
+        
+        return false;
+      },
+      
+      /**
+       * Performs smooth scrolling animation with quadratic easing.
+       * @param {number} startPosition - Starting scroll position
+       * @param {number} targetPosition - Target scroll position
+       * @param {number} duration - Animation duration in milliseconds
+       * @private
+       */
+      animateScroll(startPosition, targetPosition, duration) {
+        const distance = targetPosition - startPosition;
+        
+        // Skip tiny movements
+        if (Math.abs(distance) < 10) return;
+        
+        let startTime = null;
+        
+        const animation = (currentTime) => {
+          if (startTime === null) startTime = currentTime;
+          const timeElapsed = currentTime - startTime;
+          const progress = Math.min(timeElapsed / duration, 1);
+          
+          // Quadratic easing function for natural movement
+          const ease = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          
+          window.scrollTo(0, startPosition + distance * ease(progress));
+          
+          if (timeElapsed < duration) {
             requestAnimationFrame(animation);
           }
-        }, opts.delay);
+        };
         
-        return true; // Scrolling will be performed
+        requestAnimationFrame(animation);
       }
-      
-      return false; // No scrolling needed
-    }
+    };
 
-    // Function to update all text elements based on the selected language
+    /**
+     * Updates the UI language and persists the preference.
+     * Preserves user input values during the language switch.
+     * @param {string} lang - Language code to switch to ('en', 'pl', 'de')
+     */
     function updateLanguage(lang) {
-      // Set HTML lang attribute
       document.documentElement.setAttribute('lang', lang);
-      
       const t = translations[lang];
-      
-      // Update page title
       document.title = t.title;
       
-      // Store current input values before updating UI
-      const currentSalary = salaryInput.value;
-      const currentHours = hoursInput.value;
-      const currentAmount = amountInput.value;
+      // Preserve user input values
+      const inputValues = {
+        salary: elements.salary.value,
+        hours: elements.hours.value,
+        amount: elements.amount.value
+      };
       
-      // Update UI elements
+      // Update text content for all translatable elements
       document.getElementById('pageTitle').textContent = t.title;
       document.getElementById('languageLabel').textContent = t.languageLabel;
       document.getElementById('darkModeLabel').textContent = t.darkModeLabel;
       document.getElementById('salaryLabel').textContent = t.salaryLabel;
       document.getElementById('hoursLabel').textContent = t.hoursLabel;
       document.getElementById('amountLabel').textContent = t.amountLabel;
-      calculateButton.textContent = t.calculateButton;
+      elements.calculate.textContent = t.calculateButton;
       
-      // Restore input values after updating UI
-      salaryInput.value = currentSalary;
-      hoursInput.value = currentHours;
-      amountInput.value = currentAmount;
+      // Restore user input values
+      elements.salary.value = inputValues.salary;
+      elements.hours.value = inputValues.hours;
+      elements.amount.value = inputValues.amount;
       
-      // Save language preference
+      // Update application state and persist preference
       localStorage.setItem('language', lang);
-      currentLanguage = lang;
+      state.language = lang;
       
-      // If there are results displayed, recalculate to update the text
-      if (resultDiv.style.display !== 'none') {
+      // Recalculate if results are currently displayed
+      if (elements.result.style.display !== 'none') {
         calculate();
       }
     }
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function () {
-      // Fix input format (replace comma with dot for proper number parsing)
-      salaryInput.value = salaryInput.value.replace(',', '.');
+    /**
+     * Initializes the application when the DOM is fully loaded.
+     * Sets up language, currency, event listeners, and initial UI state.
+     */
+    document.addEventListener('DOMContentLoaded', function initializeApp() {
+      // Normalize input format (replace comma with dot)
+      elements.salary.value = elements.salary.value.replace(',', '.');
       
-      // Set initial language based on browser preference or saved preference
+      // Initialize language based on priority: localStorage > browser > default
       const savedLanguage = localStorage.getItem('language');
       const browserLanguage = navigator.language.split('-')[0];
+      const supportedLanguages = ['en', 'pl', 'de'];
       
-      if (savedLanguage && ['en', 'pl', 'de'].includes(savedLanguage)) {
-        currentLanguage = savedLanguage;
-      } else if (['en', 'pl', 'de'].includes(browserLanguage)) {
-        currentLanguage = browserLanguage;
+      if (savedLanguage && supportedLanguages.includes(savedLanguage)) {
+        state.language = savedLanguage;
+      } else if (supportedLanguages.includes(browserLanguage)) {
+        state.language = browserLanguage;
       }
       
-      // Set initial currency based on saved preference or default by region
+      // Initialize currency based on priority: localStorage > region mapping > default
       const savedCurrency = localStorage.getItem('currency');
-      let defaultCurrency = 'USD';
+      const currencyByRegion = {
+        'pl': 'PLN',
+        'de': 'EUR', 'fr': 'EUR', 'it': 'EUR', 'es': 'EUR',
+        'ja': 'JPY',
+        'zh': 'CNY',
+        'ru': 'RUB',
+        'pt': 'BRL'
+      };
       
-      // Set default currency based on browser language if no saved preference
-      if (browserLanguage === 'pl') {
-        defaultCurrency = 'PLN';
-      } else if (['de', 'fr', 'it', 'es'].includes(browserLanguage)) {
-        defaultCurrency = 'EUR';
-      } else if (browserLanguage === 'ja') {
-        defaultCurrency = 'JPY';
-      } else if (browserLanguage === 'zh') {
-        defaultCurrency = 'CNY';
-      } else if (browserLanguage === 'ru') {
-        defaultCurrency = 'RUB';
-      } else if (browserLanguage === 'pt') {
-        defaultCurrency = 'BRL';
-      }
+      state.currency = savedCurrency || currencyByRegion[browserLanguage] || 'USD';
       
-      currentCurrency = savedCurrency || defaultCurrency;
+      // Update UI to match initial state
+      elements.languageSelect.value = state.language;
+      elements.currencySelect.value = state.currency;
+      updateLanguage(state.language);
       
-      // Set the language selector to match the current language
-      languageSelect.value = currentLanguage;
+      // Set up event listeners
+      elements.calculate.addEventListener('click', calculate);
+      elements.button.addEventListener('mouseover', effects.createFloatingParticles);
+      elements.themeToggle.addEventListener('change', toggleTheme);
       
-      // Set the currency selector to match the current currency
-      currencySelect.value = currentCurrency;
-      
-      // Update all text elements to the current language
-      updateLanguage(currentLanguage);
-
-      // Event listeners
-      calculateButton.addEventListener('click', calculate);
-      button.addEventListener('mouseover', createFloatingParticles);
-      themeToggle.addEventListener('change', toggleTheme);
-      languageSelect.addEventListener('change', function() {
+      elements.languageSelect.addEventListener('change', function() {
         updateLanguage(this.value);
       });
-      currencySelect.addEventListener('change', function() {
-        currentCurrency = this.value;
-        localStorage.setItem('currency', currentCurrency);
+      
+      elements.currencySelect.addEventListener('change', function() {
+        state.currency = this.value;
+        localStorage.setItem('currency', state.currency);
         
-        // Recalculate if results are displayed
-        if (resultDiv.style.display !== 'none') {
+        if (elements.result.style.display !== 'none') {
           calculate();
         }
       });
-
-      // Create occasional floating particles
-      setInterval(createFloatingParticles, 2000);
+      
+      // Create ambient particle effects
+      setInterval(effects.createFloatingParticles, 2000);
     });
 
+    /**
+     * Performs the main calculation and updates the UI with results.
+     * Converts input values to work time equivalents and displays them.
+     */
     function calculate() {
-      const salary = parseFloat(salaryInput.value);
-      const weeklyHours = parseFloat(hoursInput.value);
-      const amount = parseFloat(amountInput.value);
+      // Parse and validate input values
+      const salary = parseFloat(elements.salary.value);
+      const weeklyHours = parseFloat(elements.hours.value);
+      const amount = parseFloat(elements.amount.value);
       
-      const lang = currentLanguage;
-      const t = translations[lang];
-
+      const t = translations[state.language];
+      
+      // Validate inputs
       if (isNaN(salary) || isNaN(weeklyHours) || isNaN(amount) || weeklyHours <= 0) {
         alert(t.invalidInputs);
         return;
       }
-
-      // Convert weekly hours to monthly (4.33 weeks per month on average)
-      const monthlyHours = (weeklyHours * 52) / 12;
-      const rate = salary / monthlyHours;
-      const time = amount / rate;
-
-      const hours = Math.floor(time);
-      const minutes = Math.round((time - hours) * 60);
-
-      // Calculate additional time periods
-      const days = Math.floor(hours / 8); // Assuming 8-hour workday
-      const remainingHours = hours % 8;
-      const weeks = Math.floor(days / 5); // Assuming 5-day workweek
-      const remainingDays = days % 5;
-      const months = Math.floor(weeks / 4.33); // Average weeks per month
-      const remainingWeeks = Math.floor(weeks % 4.33);
+      
+      // Core calculations
+      const monthlyHours = (weeklyHours * 52) / 12; // 4.33 weeks per month average
+      const hourlyRate = salary / monthlyHours;
+      const workHoursRequired = amount / hourlyRate;
+      
+      // Time breakdown
+      const timeUnits = calculateTimeUnits(workHoursRequired);
+      const currencySymbol = currencySymbols[state.currency] || '$';
+      
+      // Update UI with results
+      updateResultDisplay(t, timeUnits, {
+        hourlyRate,
+        amount,
+        currencySymbol,
+        paychecksNeeded: amount / salary
+      });
+      
+      // Visual effects and scrolling
+      effects.createParticleExplosion();
+      scrollToResults();
+    }
+    
+    /**
+     * Calculates time units from total work hours.
+     * @param {number} totalHours - Total work hours
+     * @returns {Object} Calculated time units
+     */
+    function calculateTimeUnits(totalHours) {
+      const hours = Math.floor(totalHours);
+      const minutes = Math.round((totalHours - hours) * 60);
+      
+      // Convert to larger time units
+      const HOURS_PER_DAY = 8;
+      const DAYS_PER_WEEK = 5;
+      const WEEKS_PER_MONTH = 4.33;
+      
+      const days = Math.floor(hours / HOURS_PER_DAY);
+      const remainingHours = hours % HOURS_PER_DAY;
+      
+      const weeks = Math.floor(days / DAYS_PER_WEEK);
+      const remainingDays = days % DAYS_PER_WEEK;
+      
+      const months = Math.floor(weeks / WEEKS_PER_MONTH);
+      const remainingWeeks = Math.floor(weeks % WEEKS_PER_MONTH);
+      
       const years = Math.floor(months / 12);
       const remainingMonths = months % 12;
-
-      // Calculate number of paychecks needed
-      const paychecksNeeded = amount / salary;
       
-      // Get currency symbol from the selected currency
-      const currencySymbol = currencySymbols[currentCurrency] || '$';
-
-      // Set hourly rate
-      rateOutput.textContent = formatString(t.hourlyRate, `${rate.toFixed(2)} ${currencySymbol}`);
+      return {
+        hours, minutes, days, remainingHours,
+        weeks, remainingDays, months, remainingWeeks,
+        years, remainingMonths
+      };
+    }
+    
+    /**
+     * Updates the UI with calculation results.
+     * @param {Object} t - Translation strings
+     * @param {Object} timeUnits - Calculated time units
+     * @param {Object} params - Additional parameters for display
+     */
+    function updateResultDisplay(t, timeUnits, params) {
+      // Display hourly rate
+      elements.rate.textContent = utils.formatString(
+        t.hourlyRate, 
+        `${params.hourlyRate.toFixed(2)} ${params.currencySymbol}`
+      );
       
-      // Set basic time needed with improved formatting
-      timeBasicOutput.innerHTML = `
+      // Display time needed with improved formatting
+      elements.timeBasic.innerHTML = `
         <div>${t.workTimeNeededFor || "Work time needed for"} 
-        <span class="cost-value">${amount.toFixed(2)} ${currencySymbol}</span>:</div>
-        <div class="time-value">${hours} ${t.hrs || "hrs"} ${minutes} ${t.mins || "mins"}</div>
+        <span class="cost-value">${params.amount.toFixed(2)} ${params.currencySymbol}</span>:</div>
+        <div class="time-value">${timeUnits.hours} ${t.hrs || "hrs"} ${timeUnits.minutes} ${t.mins || "mins"}</div>
       `;
       
-      // Set equivalent time period
-      let equivalentText = '';
-      if (years > 0) {
-        equivalentText = `${t.equalTo} ${years} ${getPlural(years, t.year, t.years)}`;
-        if (remainingMonths > 0) {
-          equivalentText += ` ${t.and} ${remainingMonths} ${getPlural(remainingMonths, t.month, t.months)}`;
-        }
-        equivalentText += '.';
-      } else if (months > 0) {
-        equivalentText = `${t.equalTo} ${months} ${getPlural(months, t.month, t.months)}`;
-        if (remainingWeeks > 0) {
-          equivalentText += ` ${t.and} ${remainingWeeks} ${getPlural(remainingWeeks, t.week, t.weeks)}`;
-        }
-        equivalentText += '.';
-      } else if (weeks > 0) {
-        equivalentText = `${t.equalTo} ${weeks} ${getPlural(weeks, t.week, t.weeks)}`;
-        if (remainingDays > 0) {
-          equivalentText += ` ${t.and} ${remainingDays} ${getPlural(remainingDays, t.day, t.days)}`;
-        }
-        equivalentText += '.';
-      } else if (days > 0) {
-        equivalentText = `${t.equalTo} ${days} ${getPlural(days, t.day, t.days)}`;
-        if (remainingHours > 0) {
-          equivalentText += ` ${t.and} ${remainingHours} ${getPlural(remainingHours, t.hour, t.hours)}`;
-        }
-        equivalentText += '.';
-      }
+      // Generate equivalent time period text
+      const equivalentText = generateEquivalentTimeText(t, timeUnits);
       
-      // Only show if we have a meaningful equivalent (at least days)
       if (equivalentText) {
-        timeEquivalentOutput.textContent = equivalentText;
-        timeEquivalentOutput.style.display = 'block';
+        elements.timeEquivalent.textContent = equivalentText;
+        elements.timeEquivalent.style.display = 'block';
       } else {
-        timeEquivalentOutput.style.display = 'none';
+        elements.timeEquivalent.style.display = 'none';
       }
-
-      // Set paycheck information
-      const paychecksSection = paychecksOutput.parentElement;
-      if (paychecksNeeded >= 0.1) { // Only show if it's at least 10% of a paycheck
-        if (paychecksNeeded < 1) {
-          // For less than 1 paycheck, show as percentage
-          const percentageOfPaycheck = (paychecksNeeded * 100).toFixed(0);
-          paychecksOutput.textContent = formatString(t.paychecksPercentage || "It will cost you {0}% of your monthly paycheck.", percentageOfPaycheck);
-        } else {
-          // Handle Polish special case with array of plural forms
-          let paychecksText = t.paychecksNeeded;
-          if (Array.isArray(paychecksText)) {
-            if (paychecksNeeded === 1) {
-              paychecksText = paychecksText[0];
-            } else if (paychecksNeeded < 5) {
-              paychecksText = paychecksText[1];
-            } else {
-              paychecksText = paychecksText[2];
-            }
-          }
-          paychecksOutput.textContent = formatString(paychecksText, paychecksNeeded.toFixed(1));
-        }
-        paychecksSection.style.display = 'block';
-      } else {
-        // Hide the paychecks section if it's less than 10% of a paycheck
-        paychecksSection.style.display = 'none';
-      }
-      resultDiv.style.display = 'block';
-
-      // Create particle effect
-      createParticleExplosion();
       
-      // Determine best scroll position based on result height
-      const resultHeight = resultDiv.offsetHeight;
+      // Update paycheck information
+      updatePaycheckDisplay(t, params.paychecksNeeded);
+      
+      // Show results
+      elements.result.style.display = 'block';
+    }
+    
+    /**
+     * Generates human-readable equivalent time text.
+     * @param {Object} t - Translation strings
+     * @param {Object} units - Time units
+     * @returns {string} Formatted text
+     */
+    function generateEquivalentTimeText(t, units) {
+      let text = '';
+      
+      if (units.years > 0) {
+        text = `${t.equalTo} ${units.years} ${utils.getPlural(units.years, t.year, t.years)}`;
+        if (units.remainingMonths > 0) {
+          text += ` ${t.and} ${units.remainingMonths} ${utils.getPlural(units.remainingMonths, t.month, t.months)}`;
+        }
+      } else if (units.months > 0) {
+        text = `${t.equalTo} ${units.months} ${utils.getPlural(units.months, t.month, t.months)}`;
+        if (units.remainingWeeks > 0) {
+          text += ` ${t.and} ${units.remainingWeeks} ${utils.getPlural(units.remainingWeeks, t.week, t.weeks)}`;
+        }
+      } else if (units.weeks > 0) {
+        text = `${t.equalTo} ${units.weeks} ${utils.getPlural(units.weeks, t.week, t.weeks)}`;
+        if (units.remainingDays > 0) {
+          text += ` ${t.and} ${units.remainingDays} ${utils.getPlural(units.remainingDays, t.day, t.days)}`;
+        }
+      } else if (units.days > 0) {
+        text = `${t.equalTo} ${units.days} ${utils.getPlural(units.days, t.day, t.days)}`;
+        if (units.remainingHours > 0) {
+          text += ` ${t.and} ${units.remainingHours} ${utils.getPlural(units.remainingHours, t.hour, t.hours)}`;
+        }
+      } else {
+        return '';
+      }
+      
+      return text + '.';
+    }
+    
+    /**
+     * Updates the paycheck information display.
+     * @param {Object} t - Translation strings
+     * @param {number} paychecksNeeded - Number of paychecks needed
+     */
+    function updatePaycheckDisplay(t, paychecksNeeded) {
+      const paychecksSection = elements.paychecks.parentElement;
+      
+      if (paychecksNeeded < 0.1) {
+        paychecksSection.style.display = 'none';
+        return;
+      }
+      
+      if (paychecksNeeded < 1) {
+        // Show as percentage for values less than 1
+        const percentageOfPaycheck = Math.round(paychecksNeeded * 100);
+        elements.paychecks.textContent = utils.formatString(
+          t.paychecksPercentage || "It will cost you {0}% of your monthly paycheck.",
+          percentageOfPaycheck
+        );
+      } else {
+        // Handle plural forms
+        let paychecksText = t.paychecksNeeded;
+        if (Array.isArray(paychecksText)) {
+          if (paychecksNeeded === 1) {
+            paychecksText = paychecksText[0];
+          } else if (paychecksNeeded < 5) {
+            paychecksText = paychecksText[1];
+          } else {
+            paychecksText = paychecksText[2];
+          }
+        }
+        elements.paychecks.textContent = utils.formatString(paychecksText, paychecksNeeded.toFixed(1));
+      }
+      
+      paychecksSection.style.display = 'block';
+    }
+    
+    
+    /**
+     * Scrolls to the results section with smooth animation.
+     */
+    function scrollToResults() {
+      const resultHeight = elements.result.offsetHeight;
       const windowHeight = window.innerHeight;
       const scrollBlock = resultHeight > windowHeight * 0.7 ? 'start' : 'center';
       
-      // Scroll to the results with our enhanced function - with longer delay and duration for very smooth scrolling
-      smoothScrollToElement(resultDiv, {
+      utils.smoothScrollToElement(elements.result, {
         behavior: 'smooth',
         block: scrollBlock,
-        delay: 600,     // Longer delay before starting to scroll
-        duration: 1500  // Longer duration for slower, smoother scrolling
+        delay: 600,
+        duration: 1500
       });
     }
-
+    
     /**
-     * Creates particles that float upward when hovering over the button
-     * Limited number of particles to maintain performance
-     */
-    function createFloatingParticles() {
-      for (let i = 0; i < 3; i++) {
-        setTimeout(() => {
-          const particle = document.createElement('div');
-          particle.className = 'particle';
-
-          const xPos = 15 + Math.random() * 70;
-          particle.style.left = `${xPos}%`;
-          particle.style.bottom = '0';
-
-          const size = 2 + Math.random() * 3;
-          particle.style.width = `${size}px`;
-          particle.style.height = `${size}px`;
-
-          particle.style.opacity = 0.2 + Math.random() * 0.3;
-
-          particlesContainer.appendChild(particle);
-
-          let bottom = 0;
-          let opacity = parseFloat(particle.style.opacity);
-
-          const rise = setInterval(() => {
-            bottom += 0.5;
-            opacity -= 0.004;
-
-            particle.style.bottom = `${bottom}px`;
-            particle.style.opacity = opacity;
-
-            if (bottom > 70 || opacity <= 0) {
-              clearInterval(rise);
-              particle.remove();
-            }
-          }, 16);
-        }, i * 250);
-      }
-    }
-
-    /**
-     * Creates a burst effect of particles when the calculation button is clicked
-     * Uses relative positioning to ensure compatibility across screen sizes
-     */
-    function createParticleExplosion() {
-      const buttonRect = button.getBoundingClientRect();
-
-      const centerX = (buttonRect.width / 2);
-      const centerY = (buttonRect.height / 2);
-
-      for (let i = 0; i < 15; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-
-        particle.style.left = `${centerX}px`;
-        particle.style.top = `${centerY}px`;
-
-        const size = 2 + Math.random() * 3;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-
-        particle.style.opacity = 0.4 + Math.random() * 0.3;
-
-        // Create particles with color matching the button
-        const hue = 240 + Math.random() * 15; // Indigo/violet hue for our new color scheme
-        const saturation = 70 + Math.random() * 20;
-        const lightness = 60 + Math.random() * 15;
-        particle.style.background = `hsla(${hue}, ${saturation}%, ${lightness}%, ${particle.style.opacity})`;
-
-        particlesContainer.appendChild(particle);
-
-        // Calculate random trajectory
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 0.8 + Math.random() * 3.5;
-        const vx = Math.cos(angle) * speed;
-        const vy = Math.sin(angle) * speed;
-
-        let x = centerX;
-        let y = centerY;
-        let opacity = parseFloat(particle.style.opacity);
-
-        const move = setInterval(() => {
-          x += vx;
-          y += vy;
-          opacity -= 0.015;
-
-          particle.style.left = `${x}px`;
-          particle.style.top = `${y}px`;
-          particle.style.opacity = opacity;
-
-          if (opacity <= 0 ||
-            x < 0 || x > buttonRect.width ||
-            y < 0 || y > buttonRect.height) {
-            clearInterval(move);
-            particle.remove();
-          }
-        }, 16);
-      }
-    }
-
-    /**
-     * Toggles between light and dark themes
+     * Toggles between light and dark themes.
+     * Updates UI and persists preference to localStorage.
      */
     function toggleTheme() {
-      const newTheme = themeToggle.checked ? 'dark' : 'light';
-
+      const newTheme = elements.themeToggle.checked ? 'dark' : 'light';
+      
       document.documentElement.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
-
-      // Add a subtle animation effect when changing themes
+      
+      // Add subtle transition effect
       document.body.style.transition = `background-color var(--transition), color var(--transition)`;
       setTimeout(() => {
         document.body.style.transition = '';
