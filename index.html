@@ -685,6 +685,7 @@
         "hours": "hours",
         "and": "and",
         "paychecksNeeded": "You'll need {0} monthly paychecks to buy this.",
+        "paychecksPercentage": "It will cost you {0}% of your monthly paycheck.",
         "currencySymbol": "$"
       },
       pl: {
@@ -711,6 +712,7 @@
         "hours": ["godzinom", "godzinom"],
         "and": "i",
         "paychecksNeeded": ["Na kupno potrzebne będzie ci {0} miesięcznej wypłaty.", "Na kupno potrzebne będzie ci {0} miesięcznych wypłat.", "Na kupno potrzebne będzie ci {0} miesięcznych wypłat."],
+        "paychecksPercentage": "To będzie kosztować {0}% twojej miesięcznej wypłaty.",
         "currencySymbol": "zł"
       },
       de: {
@@ -737,6 +739,7 @@
         "hours": "Stunden",
         "and": "und",
         "paychecksNeeded": "Sie benötigen {0} monatliche Gehaltszahlungen, um dies zu kaufen.",
+        "paychecksPercentage": "Es kostet {0}% Ihres monatlichen Gehalts.",
         "currencySymbol": "€"
       }
     };
@@ -826,6 +829,11 @@
       // Update page title
       document.title = t.title;
       
+      // Store current input values before updating UI
+      const currentSalary = salaryInput.value;
+      const currentHours = hoursInput.value;
+      const currentAmount = amountInput.value;
+      
       // Update UI elements
       document.getElementById('pageTitle').textContent = t.title;
       document.getElementById('languageLabel').textContent = t.languageLabel;
@@ -834,6 +842,11 @@
       document.getElementById('hoursLabel').textContent = t.hoursLabel;
       document.getElementById('amountLabel').textContent = t.amountLabel;
       calculateButton.textContent = t.calculateButton;
+      
+      // Restore input values after updating UI
+      salaryInput.value = currentSalary;
+      hoursInput.value = currentHours;
+      amountInput.value = currentAmount;
       
       // Save language preference
       localStorage.setItem('language', lang);
@@ -986,18 +999,24 @@
       // Set paycheck information
       const paychecksSection = paychecksOutput.parentElement;
       if (paychecksNeeded >= 0.1) { // Only show if it's at least 10% of a paycheck
-        // Handle Polish special case with array of plural forms
-        let paychecksText = t.paychecksNeeded;
-        if (Array.isArray(paychecksText)) {
-          if (paychecksNeeded === 1) {
-            paychecksText = paychecksText[0];
-          } else if (paychecksNeeded < 5) {
-            paychecksText = paychecksText[1];
-          } else {
-            paychecksText = paychecksText[2];
+        if (paychecksNeeded < 1) {
+          // For less than 1 paycheck, show as percentage
+          const percentageOfPaycheck = (paychecksNeeded * 100).toFixed(0);
+          paychecksOutput.textContent = formatString(t.paychecksPercentage || "It will cost you {0}% of your monthly paycheck.", percentageOfPaycheck);
+        } else {
+          // Handle Polish special case with array of plural forms
+          let paychecksText = t.paychecksNeeded;
+          if (Array.isArray(paychecksText)) {
+            if (paychecksNeeded === 1) {
+              paychecksText = paychecksText[0];
+            } else if (paychecksNeeded < 5) {
+              paychecksText = paychecksText[1];
+            } else {
+              paychecksText = paychecksText[2];
+            }
           }
+          paychecksOutput.textContent = formatString(paychecksText, paychecksNeeded.toFixed(1));
         }
-        paychecksOutput.textContent = formatString(paychecksText, paychecksNeeded.toFixed(1));
         paychecksSection.style.display = 'block';
       } else {
         // Hide the paychecks section if it's less than 10% of a paycheck
