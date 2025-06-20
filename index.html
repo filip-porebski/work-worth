@@ -474,58 +474,93 @@
     }
 
     .result {
-      background: var(--result-bg);
-      padding: 1.5rem;
-      border-radius: var(--input-radius);
-      margin-top: 1.5rem;
-      text-align: center;
-      transition: background-color var(--transition);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      background: transparent;
+      padding: 2.5rem 0;
+      margin-top: 2rem;
+      text-align: left;
+      transition: all var(--transition);
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 2rem;
       width: 100%;
+      position: relative;
       overflow: hidden;
-      word-break: break-word;
+      border-top: 1px solid var(--gray-border);
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    [data-theme="dark"] .result {
+      border-top-color: var(--gray-border);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .result-section {
-      padding: 0.75rem;
+      padding: 0;
+      position: relative;
     }
 
     .result-section:not(:last-child) {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-      padding-bottom: 1.25rem;
-    }
-
-    [data-theme="dark"] .result-section:not(:last-child) {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      margin-bottom: 1rem;
     }
 
     .result p {
       margin: 0;
       font-size: 1rem;
       color: var(--text-color);
-      line-height: 1.6;
+      line-height: 1.8;
+      letter-spacing: 0.01em;
     }
     
     .result-hourly-rate {
       font-weight: 600;
       color: var(--primary);
-      font-size: 1.1rem;
-      margin-bottom: 0.25rem;
+      font-size: 1.5rem;
+      margin: 0 0 1.5rem 0;
+      display: inline-block;
+      position: relative;
+      letter-spacing: -0.01em;
     }
     
     .result-time-needed {
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+      font-size: 1.05rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .time-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-top: 0.25rem;
+    }
+    
+    .cost-value {
+      font-weight: 600;
     }
     
     .result-equivalent {
       opacity: 0.75;
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+      /* font-style: italic; */
+      color: var(--label-color);
     }
     
     .result-paychecks {
       font-weight: 500;
+      display: inline-block;
+      position: relative;
+      padding-left: 0.75rem;
+      border-left: 2px solid var(--primary);
+      font-size: 1.05rem;
+      margin-top: 0.5rem;
     }
 
     /* Dark/Light mode icons */
@@ -645,7 +680,7 @@
 
     <div class="result" id="result" style="display: none;">
       <div class="result-section">
-        <p class="result-hourly-rate" id="rate"></p>
+        <h2 class="result-hourly-rate" id="rate"></h2>
       </div>
       <div class="result-section">
         <p class="result-time-needed" id="timeBasic"></p>
@@ -672,6 +707,9 @@
         "invalidInputs": "Please enter valid values.",
         "hourlyRate": "Hourly rate: {0}/h",
         "timeNeeded": "Work time needed for {0}: {1} hrs {2} mins",
+        "workTimeNeededFor": "Work time needed for",
+        "hrs": "hrs",
+        "mins": "mins",
         "equalTo": "This equals",
         "year": "year",
         "years": "years",
@@ -699,6 +737,9 @@
         "invalidInputs": "Proszę wprowadzić poprawne wartości.",
         "hourlyRate": "Stawka godzinowa: {0}/h",
         "timeNeeded": "Czas pracy potrzebny na {0}: {1} godz. {2} min.",
+        "workTimeNeededFor": "Czas pracy potrzebny na",
+        "hrs": "godz.",
+        "mins": "min.",
         "equalTo": "To równa się",
         "year": "rokowi",
         "years": ["latom", "latom"],
@@ -726,6 +767,9 @@
         "invalidInputs": "Bitte geben Sie gültige Werte ein.",
         "hourlyRate": "Stundensatz: {0}/h",
         "timeNeeded": "Arbeitszeit benötigt für {0}: {1} Std. {2} Min.",
+        "workTimeNeededFor": "Arbeitszeit benötigt für",
+        "hrs": "Std.",
+        "mins": "Min.",
         "equalTo": "Das entspricht",
         "year": "Jahr",
         "years": "Jahren",
@@ -964,8 +1008,12 @@
       // Set hourly rate
       rateOutput.textContent = formatString(t.hourlyRate, `${rate.toFixed(2)} ${currencySymbol}`);
       
-      // Set basic time needed
-      timeBasicOutput.textContent = formatString(t.timeNeeded, `${amount.toFixed(2)} ${currencySymbol}`, hours, minutes);
+      // Set basic time needed with improved formatting
+      timeBasicOutput.innerHTML = `
+        <div>${t.workTimeNeededFor || "Work time needed for"} 
+        <span class="cost-value">${amount.toFixed(2)} ${currencySymbol}</span>:</div>
+        <div class="time-value">${hours} ${t.hrs || "hrs"} ${minutes} ${t.mins || "mins"}</div>
+      `;
       
       // Set equivalent time period
       let equivalentText = '';
@@ -994,7 +1042,14 @@
         }
         equivalentText += '.';
       }
-      timeEquivalentOutput.textContent = equivalentText;
+      
+      // Only show if we have a meaningful equivalent (at least days)
+      if (equivalentText) {
+        timeEquivalentOutput.textContent = equivalentText;
+        timeEquivalentOutput.style.display = 'block';
+      } else {
+        timeEquivalentOutput.style.display = 'none';
+      }
 
       // Set paycheck information
       const paychecksSection = paychecksOutput.parentElement;
