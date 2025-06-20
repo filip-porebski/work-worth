@@ -863,6 +863,71 @@
       return count === 1 ? singular : plural;
     }
     
+    /**
+     * Smoothly scrolls to an element with better cross-browser and mobile support
+     * @param {HTMLElement} element - The element to scroll to
+     * @param {Object} options - Scrolling options
+     */
+    function smoothScrollToElement(element, options = {}) {
+      const defaultOptions = {
+        behavior: 'smooth',
+        block: 'center',
+        delay: 300,
+        duration: 1000 // Longer duration for slower scrolling
+      };
+      
+      const opts = { ...defaultOptions, ...options };
+      
+      // Check if the element is already fully visible
+      const rect = element.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      
+      // Only scroll if the element is not fully visible in the viewport
+      if (rect.bottom > windowHeight || rect.top < 0) {
+        setTimeout(() => {
+          // Use native scrollIntoView with fallback for older browsers
+          if ('scrollBehavior' in document.documentElement.style) {
+            // Apply the smooth scrolling
+            element.scrollIntoView({ 
+              behavior: opts.behavior, 
+              block: opts.block 
+            });
+          } else {
+            // Custom smooth scrolling implementation for browsers without native support
+            const startPosition = window.pageYOffset;
+            const targetPosition = element.getBoundingClientRect().top + window.pageYOffset;
+            const distance = targetPosition - startPosition;
+            
+            // Don't scroll if already very close to target
+            if (Math.abs(distance) < 10) return;
+            
+            let startTime = null;
+            
+            function animation(currentTime) {
+              if (startTime === null) startTime = currentTime;
+              const timeElapsed = currentTime - startTime;
+              const progress = Math.min(timeElapsed / opts.duration, 1);
+              
+              // Easing function for smoother animation
+              const ease = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+              
+              window.scrollTo(0, startPosition + distance * ease(progress));
+              
+              if (timeElapsed < opts.duration) {
+                requestAnimationFrame(animation);
+              }
+            }
+            
+            requestAnimationFrame(animation);
+          }
+        }, opts.delay);
+        
+        return true; // Scrolling will be performed
+      }
+      
+      return false; // No scrolling needed
+    }
+
     // Function to update all text elements based on the selected language
     function updateLanguage(lang) {
       // Set HTML lang attribute
@@ -1079,7 +1144,21 @@
       }
       resultDiv.style.display = 'block';
 
+      // Create particle effect
       createParticleExplosion();
+      
+      // Determine best scroll position based on result height
+      const resultHeight = resultDiv.offsetHeight;
+      const windowHeight = window.innerHeight;
+      const scrollBlock = resultHeight > windowHeight * 0.7 ? 'start' : 'center';
+      
+      // Scroll to the results with our enhanced function - with longer delay and duration for very smooth scrolling
+      smoothScrollToElement(resultDiv, {
+        behavior: 'smooth',
+        block: scrollBlock,
+        delay: 600,     // Longer delay before starting to scroll
+        duration: 1500  // Longer duration for slower, smoother scrolling
+      });
     }
 
     /**
